@@ -11,6 +11,7 @@ namespace game
     VARFP(playermodel, 0, 0, 4, changedplayermodel());
     VARP(forceplayermodels, 0, 0, 1);
     VARP(hidedead, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, showteamhealth, 0, 0, 1);
 
     vector<fpsent *> ragdolls;
 
@@ -187,6 +188,8 @@ namespace game
     }
 
     VARP(teamskins, 0, 0, 1);
+    XIDENT(IDF_SWLACC, FVARP, playernamesize, 2.0f, 2.0f, 10.0f);
+    XIDENT(IDF_SWLACC, VARP, playernamezoffset, 0, 0, 10);
 
     void rendergame(bool mainpass)
     {
@@ -212,7 +215,21 @@ namespace game
             renderplayer(d, getplayermodelinfo(d), team, 1, mainpass);
             copystring(d->info, colorname(d));
             if(d->maxhealth>100) { defformatstring(sn)(" +%d", d->maxhealth-100); concatstring(d->info, sn); }
-            if(d->state!=CS_DEAD) particle_text(d->abovehead(), d->info, PART_TEXT, 1, team ? (team==1 ? 0x6496FF : 0xFF4B19) : 0x1EC850, 2.0f);
+            
+            bool specorsameteam = (player1->state==CS_SPECTATOR) ? true : isteam(player1->team, d->team);
+            if(showteamhealth && m_teammode && !m_insta && specorsameteam) {
+                string healthcolor, armourcolor;
+                if(d->health <= 25) strcpy(healthcolor, "\f3");
+                else if(d->health <= 50) strcpy(healthcolor, "\f6");
+                else strcpy(healthcolor, "\f0");
+                if(d->armour <= 25) strcpy(armourcolor, "\f3");
+                else if(d->armour <= 50) strcpy(armourcolor, "\f6");
+                else strcpy(armourcolor, "\f0");
+                defformatstring(thpa)("\n%s%d\f7|%s%d", healthcolor, d->health, armourcolor, d->armour); concatstring(d->info, thpa);
+            }
+            if (d->state!=CS_DEAD && showteamhealth && specorsameteam) particle_text(d->abovehead().add(vec(0, 0, 2+playernamezoffset)), d->info, PART_TEXT, 1, team ? (team==1 ? 0x6496FF : 0xFF4B19) : 0x1EC850, (player1->o.dist(d->o)) > 10*playernamesize ? playernamesize : (player1->o.dist(d->o))/10 );
+            else if (d->state!=CS_DEAD) particle_text(d->abovehead().add(vec(0, 0, playernamezoffset)), d->info, PART_TEXT, 1, team ? (team==1 ? 0x6496FF : 0xFF4B19) : 0x1EC850, (player1->o.dist(d->o)) > 10*playernamesize ? playernamesize : (player1->o.dist(d->o))/10 );
+
         }
         loopv(ragdolls)
         {

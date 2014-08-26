@@ -207,6 +207,10 @@ namespace game
         adddecal(DECAL_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
     }
         
+    XIDENT(IDF_SWLACC, HVARP, glflarecolor, 0, 0x404040, 0xFFFFFF);
+    XIDENT(IDF_SWLACC, FVARP, glflaresize, 0, 2.4f, 5.0f);
+    XIDENT(IDF_SWLACC, VARP, gltrailtime, 0, 150, 1000);
+
 XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
     void updatebouncers(int time)
     {
@@ -223,7 +227,8 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
             {
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
-                regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.4f, 50, -20);
+                //regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.4f, 50, -20);
+                regular_particle_splash(PART_SMOKE, 1, gltrailtime, pos, glflarecolor, glflaresize, 50, -20);
             }
             vec old(bnc.o);
             bool stopped = false;
@@ -353,7 +358,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
         fpsent *f = (fpsent *)d;
 
         f->lastpain = lastmillis;
-        if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->totaldamage += damage;
+        if(!(at==player1 && d==player1) && at->type==ENT_PLAYER && at->aitype==AI_NONE) at->totaldamage += damage;
 
         if(f->type==ENT_AI || !m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, gun);
 
@@ -580,6 +585,22 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
 
     VARP(muzzleflash, 0, 1, 1);
     VARP(muzzlelight, 0, 1, 1);
+    
+    // gun particle flare colors
+    XIDENT(IDF_SWLACC, HVARP, sgflarecolor, 0, 0xFFC864, 0xFFFFFF);
+    XIDENT(IDF_SWLACC, HVARP, cgflarecolor, 0, 0xFFC864, 0xFFFFFF);
+    //XIDENT(IDF_SWLACC, HVARP, rlflarecolor, 0, 0xFFFFFF, 0xFFFFFF);
+    XIDENT(IDF_SWLACC, HVARP, riflarecolor, 0, 0x404040, 0xFFFFFF);
+    // gun particle_flare sizes
+    XIDENT(IDF_SWLACC, FVARP, sgflaresize, 0, 0.28f, 5.0f);
+    XIDENT(IDF_SWLACC, FVARP, cgflaresize, 0, 0.28f, 5.0f);
+    //XIDENT(IDF_SWLACC, FVARP, rlflaresize, 0, 1.5f, 5.0f);
+    XIDENT(IDF_SWLACC,FVARP, riflaresize, 0, 0.6f, 5.0f);
+    // gun particle_flare trail time in ms
+    XIDENT(IDF_SWLACC, VARP, sgtrailtime, 0, 300, 1000);
+    XIDENT(IDF_SWLACC, VARP, cgtrailtime, 0, 600, 1000);
+    //XIDENT(IDF_SWLACC, VARP, rltrailtime, 0, 200, 1000);
+    XIDENT(IDF_SWLACC, VARP, ritrailtime, 0, 400, 1000);
 
     void shoteffects(int gun, const vec &from, const vec &to, fpsent *d, bool local, int id, int prevaction)     // create visual effect from a shot
     {
@@ -598,7 +619,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
                 loopi(guns[gun].rays)
                 {
                     if(!reducesparks) particle_splash(PART_SPARK, 20, 250, rays[i], 0xB49B4B, 0.24f);
-                    particle_flare(hudgunorigin(gun, from, rays[i], d), rays[i], 300, PART_STREAK, 0xFFC864, 0.28f);
+                    particle_flare(hudgunorigin(gun, from, rays[i], d), rays[i], sgtrailtime, PART_STREAK, sgflarecolor, sgflaresize);
                     if(!local) adddecal(DECAL_BULLET, rays[i], vec(from).sub(rays[i]).normalize(), 2.0f);
                 }
                 if(muzzlelight) adddynlight(hudgunorigin(gun, d->o, to, d), 30, vec(0.5f, 0.375f, 0.25f), 100, 100, DL_FLASH, 0, vec(0, 0, 0), d);
@@ -609,7 +630,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
             case GUN_PISTOL:
             {
                 if(!reducesparks) particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f);
-                particle_flare(hudgunorigin(gun, from, to, d), to, 600, PART_STREAK, 0xFFC864, 0.28f);
+                particle_flare(hudgunorigin(gun, from, to, d), to, cgtrailtime, PART_STREAK, cgflarecolor, cgflaresize);
                 if(muzzleflash && d->muzzle.x >= 0)
                     particle_flare(d->muzzle, d->muzzle, gun==GUN_CG ? 100 : 200, PART_MUZZLE_FLASH1, 0xFFFFFF, gun==GUN_CG ? 2.25f : 1.25f, d);
                 if(!local) adddecal(DECAL_BULLET, to, vec(from).sub(to).normalize(), 2.0f);
@@ -619,7 +640,8 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
 
             case GUN_RL:
                 if(muzzleflash && d->muzzle.x >= 0)
-                    particle_flare(d->muzzle, d->muzzle, 250, PART_MUZZLE_FLASH2, 0xFFFFFF, 3.0f, d);
+                    particle_flare(d->muzzle, d->muzzle, 200, PART_MUZZLE_FLASH2, 0xFFFFFF, 1.5f, d);
+
             case GUN_FIREBALL:
             case GUN_ICEBALL:
             case GUN_SLIMEBALL:
@@ -634,7 +656,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
                 vec up = to;
                 up.z += dist/8;
                 if(muzzleflash && d->muzzle.x >= 0)
-                    particle_flare(d->muzzle, d->muzzle, 200, PART_MUZZLE_FLASH2, 0xFFFFFF, 1.5f, d);
+                    particle_flare(d->muzzle, d->muzzle, gltrailtime, PART_MUZZLE_FLASH2, glflarecolor, glflaresize, d);
                 if(muzzlelight) adddynlight(hudgunorigin(gun, d->o, to, d), 20, vec(0.5f, 0.375f, 0.25f), 100, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 newbouncer(from, up, local, id, d, BNC_GRENADE, guns[gun].ttl, guns[gun].projspeed);
                 break;
@@ -642,7 +664,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
 
             case GUN_RIFLE:
                 if(!reducesparks) particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f);
-                particle_trail(PART_SMOKE, 500, hudgunorigin(gun, from, to, d), to, 0x404040, 0.6f, 20);
+                particle_trail(PART_SMOKE, ritrailtime, hudgunorigin(gun, from, to, d), to, riflarecolor, riflaresize, 20);
                 if(muzzleflash && d->muzzle.x >= 0)
                     particle_flare(d->muzzle, d->muzzle, 150, PART_MUZZLE_FLASH3, 0xFFFFFF, 1.25f, d);
                 if(!local) adddecal(DECAL_BULLET, to, vec(from).sub(to).normalize(), 3.0f);
@@ -785,6 +807,17 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
         if(d->gunselect) d->ammo[d->gunselect]--;
         vec from = d->o;
         vec to = targ;
+        
+        switch(d->gunselect)
+        {
+            case GUN_FIST: d->fistshots += 50; break;
+            case GUN_SG: d->sgshots += 200; break;
+            case GUN_CG: d->cgshots += 30; break;
+            case GUN_RL: d->rlshots += 120; break;
+            case GUN_RIFLE: d->rishots += 100; break;
+            case GUN_GL: d->glshots += 90; break;
+            case GUN_PISTOL: d->pistolshots += 35; break;
+        }
 
         vec unitv;
         float dist = to.dist(from, unitv);

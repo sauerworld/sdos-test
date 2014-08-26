@@ -13,6 +13,8 @@ namespace game
     VARP(showconnecting, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, showfrags, 0, 1, 1);
     XIDENT(IDF_SWLACC, VARP, showflags, 0, 1, 1);
+    XIDENT(IDF_SWLACC, VARP, showdamagedealt, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, showaccuracy, 0, 0, 1);
 
     static hashset<teaminfo> teaminfos;
 
@@ -245,6 +247,26 @@ namespace game
                 loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->frags));
                 g.poplist();
             }
+
+            // show totaldamage per player
+			if(showdamagedealt)
+			{
+				g.pushlist();
+				g.strut(5);
+				g.text("dd", fgcolor);
+				loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%d.%dk", 0xFFFFDD, NULL,(o->totaldamage)/1000 ,((o->totaldamage)%1000)/100 ) : g.textf("%d", 0xFFFFDD, NULL,  o->totaldamage));
+				g.poplist();
+			}
+
+			// show accuracy per player
+			if(showaccuracy)
+			{
+				g.pushlist();
+				g.strut(5);
+				g.text("acc", fgcolor);
+				loopscoregroup(o, g.textf("%d%%", 0xFFFFDD, NULL, (o->totaldamage*100)/max(o->totalshots, 1)));
+				g.poplist();
+			}
 
             g.pushlist();
             g.text("name", fgcolor);

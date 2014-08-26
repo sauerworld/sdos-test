@@ -2,3 +2,5 @@
 */*.o
 */*.res
 *.exe
+.cproject
+.project

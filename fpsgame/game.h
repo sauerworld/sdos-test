@@ -546,6 +546,14 @@ struct fpsent : dynent, fpsstate
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
+    
+    int sgdamage, sgshots;
+    int cgdamage, cgshots;
+    int rldamage, rlshots;
+    int ridamage, rishots;
+    int gldamage, glshots;
+    int pistoldamage, pistolshots;
+    int fistdamage, fistshots;
 
     string name, team, info;
     int playermodel;
@@ -556,6 +564,8 @@ struct fpsent : dynent, fpsstate
 
     fpsent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), idlesound(-1), idlechan(-1), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), playermodel(-1), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
+        sgshots = cgshots = rlshots = rishots = glshots = fistshots = pistolshots = 0;
+        sgdamage = cgdamage = rldamage = ridamage = gldamage = fistdamage = pistoldamage = 0;
         name[0] = team[0] = info[0] = 0;
         respawn();
     }
@@ -711,9 +721,11 @@ namespace game
     extern const char *teamcolorname(fpsent *d, const char *alt = "you");
     extern const char *teamcolor(const char *name, bool sameteam, const char *alt = NULL);
     extern const char *teamcolor(const char *name, const char *team, const char *alt = NULL);
+    extern const char *chatcolorname(fpsent *d);
     extern fpsent *pointatplayer();
     extern fpsent *hudplayer();
     extern fpsent *followingplayer();
+    extern fpsent *statsclient();
     extern void stopfollowing();
     extern void clientdisconnected(int cn, bool notify = true);
     extern void clearclients(bool notify = true);

@@ -2342,6 +2342,8 @@ namespace server
         ci->timesync = false;
     }
 
+    VAR(demo_jumps, 0, 0, 600);
+
     void serverupdate()
     {
         emulatecurtime;
@@ -2349,7 +2351,17 @@ namespace server
         {
             gamemillis += curtime;
 
-            if(m_demo) readdemo(curtime);
+            if(m_demo)
+            {
+            	if ( !(demo_jumps == 0) )
+            	{
+            		gamemillis+=(demo_jumps*1000);
+            		readdemo(curtime + (demo_jumps*1000));
+            		demo_jumps = 0;
+            		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0);
+            	}
+            	else readdemo(curtime);
+            }
             else if(!m_timed || gamemillis < gamelimit)
             {
                 processevents(curtime);

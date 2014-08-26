@@ -4,7 +4,10 @@ extern int multipoll;
 
 namespace game
 {
-    bool intermission = false;
+	XIDENT(IDF_SWLACC, VARP, chatcolors, 0, 0, 1);
+   XIDENT(IDF_SWLACC, VARP, speccolors, 0, 0, 1);
+
+	bool intermission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
     int respawnent = -1;
     int lasthit = 0, lastspawnattempt = 0;
@@ -126,6 +129,14 @@ namespace game
         fpsent *target = getclient(following);
         if(target && target->state!=CS_SPECTATOR) return target;
         return NULL;
+    }
+    
+    fpsent *statsclient()
+    {
+        if(player1->state!=CS_SPECTATOR || following<0) return player1;
+        fpsent *target = getclient(following);
+        if(target && target->state!=CS_SPECTATOR) return target;
+        return player1;
     }
 
     fpsent *hudplayer()
@@ -466,13 +477,20 @@ namespace game
         }
     }
 
-    ICOMMAND(getfrags, "", (), intret(player1->frags));
-    ICOMMAND(getflags, "", (), intret(player1->flags));
-    ICOMMAND(getdeaths, "", (), intret(player1->deaths));
-    ICOMMAND(getaccuracy, "", (), intret((player1->totaldamage*100)/max(player1->totalshots, 1)));
-    ICOMMAND(gettotaldamage, "", (), intret(player1->totaldamage));
-    ICOMMAND(gettotalshots, "", (), intret(player1->totalshots));
-
+    ICOMMAND(getfrags, "", (), intret(statsclient()->frags));
+    ICOMMAND(getflags, "", (), intret(statsclient()->flags));
+    ICOMMAND(getdeaths, "", (), intret(statsclient()->deaths));
+    ICOMMAND(getaccuracy, "", (), intret((statsclient()->totaldamage*100)/max(statsclient()->totalshots, 1)));
+    ICOMMAND(gettotaldamage, "", (), intret(statsclient()->totaldamage));
+    ICOMMAND(gettotalshots, "", (), intret(statsclient()->totalshots));
+    ICOMMAND(getsgaccuracy, "", (), intret((statsclient()->sgdamage*100)/max(statsclient()->sgshots, 1)));
+    ICOMMAND(getcgaccuracy, "", (), intret((statsclient()->cgdamage*100)/max(statsclient()->cgshots, 1)));
+    ICOMMAND(getrlaccuracy, "", (), intret((statsclient()->rldamage*100)/max(statsclient()->rlshots, 1)));
+    ICOMMAND(getriaccuracy, "", (), intret((statsclient()->ridamage*100)/max(statsclient()->rishots, 1)));
+    ICOMMAND(getglaccuracy, "", (), intret((statsclient()->gldamage*100)/max(statsclient()->glshots, 1)));
+    ICOMMAND(getfistaccuracy, "", (), intret((statsclient()->fistdamage*100)/max(statsclient()->fistshots, 1)));
+    ICOMMAND(getpistolaccuracy, "", (), intret((statsclient()->pistoldamage*100)/max(statsclient()->pistolshots, 1)));
+    
     vector<fpsent *> clients;
 
     fpsent *newclient(int cn)   // ensure valid entity
@@ -559,6 +577,8 @@ namespace game
             d->maxhealth = 100;
             d->lifesequence = -1;
             d->respawned = d->suicided = -2;
+            d->sgshots = d->cgshots = d->rlshots = d->rishots = d->glshots = d->fistshots = d->pistolshots = 0;
+            d->sgdamage = d->cgdamage = d->rldamage = d->ridamage = d->gldamage = d->fistdamage = d->pistoldamage = 0;
         }
 
         setclientmode();
@@ -701,6 +721,11 @@ namespace game
         return cname[cidx];
     }    
     
+	const char *chatcolorname(fpsent *d) {
+		if (!chatcolors || !m_teammode || d->state == CS_SPECTATOR) return colorname(d);
+		return colorname(d, NULL, isteam(d->team, player1->team) ? "\fs\f1" : "\fs\f3", "\fr");
+	}
+
     const char *teamcolor(const char *name, const char *team, const char *alt)
     {
         return teamcolor(name, team && isteam(team, player1->team), alt);
@@ -872,11 +897,21 @@ namespace game
             draw_text("SPECTATOR", w*1800/h - tw - pw, 1650 - th - fh);
             if(f) 
             {
-                int color = f->state!=CS_DEAD ? 0xFFFFFF : 0x606060;
-                if(f->privilege)
+                int color;
+                if(speccolors && m_teammode)
+                {
+                    color = (isteam(player1->team, f->team)) ? 0x60A0FF : 0xFF4040;
+                }
+                else
                 {
                     color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
                     if(f->state==CS_DEAD) color = (color>>1)&0x7F7F7F;
+                    color = f->state!=CS_DEAD ? 0xFFFFFF : 0x606060;
+                    if(f->privilege)
+                    {
+                        color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                        if(f->state==CS_DEAD) color = (color>>1)&0x7F7F7F;
+                    }
                 }
                 draw_text(colorname(f), w*1800/h - fw - pw, 1650 - fh, (color>>16)&0xFF, (color>>8)&0xFF, color&0xFF);
             }

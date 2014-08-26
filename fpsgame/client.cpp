@@ -894,10 +894,10 @@ namespace game
         sdos::resetauth();
     }
 
-    void toserver(char *text) { conoutf(CON_CHAT, "%s:\f0 %s", colorname(player1), text); addmsg(N_TEXT, "rcs", player1, text); }
+    void toserver(char *text) { conoutf(CON_CHAT, "%s:\f0 %s", chatcolorname(player1), text); addmsg(N_TEXT, "rcs", player1, text); }
     COMMANDN(say, toserver, "C");
 
-    void sayteam(char *text) { conoutf(CON_TEAMCHAT, "%s:\f1 %s", colorname(player1), text); addmsg(N_SAYTEAM, "rcs", player1, text); }
+    void sayteam(char *text) { conoutf(CON_TEAMCHAT, "%s:\f6 %s", chatcolorname(player1), text); addmsg(N_SAYTEAM, "rcs", player1, text); }
     COMMAND(sayteam, "C");
 
     ICOMMAND(servcmd, "C", (char *cmd), addmsg(N_SERVCMD, "rs", cmd));
@@ -1307,7 +1307,7 @@ namespace game
                 if(isignored(d->clientnum)) break;
                 if(d->state!=CS_DEAD && d->state!=CS_SPECTATOR)
                     particle_textcopy(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
-                conoutf(CON_CHAT, "%s:\f0 %s", colorname(d), text);
+                conoutf(CON_CHAT, "%s:\f0 %s", chatcolorname(d), text);
                 break;
             }
 
@@ -1320,7 +1320,7 @@ namespace game
                 if(!t || isignored(t->clientnum)) break;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
                     particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, 0x6496FF, 4.0f, -8);
-                conoutf(CON_TEAMCHAT, "%s:\f1 %s", colorname(t), text);
+                conoutf(CON_TEAMCHAT, "%s:\f6 %s", chatcolorname(t), text);
                 break;
             }
 
@@ -1344,6 +1344,7 @@ namespace game
                     if(deathscore) showscores(true);
                 }
                 else d->resetinterp();
+                d->deaths += 1;
                 d->state = CS_DEAD;
                 break;
             }
@@ -1476,6 +1477,21 @@ namespace game
                 s->lastaction = lastmillis;
                 s->lastattackgun = s->gunselect;
                 shoteffects(s->gunselect, from, to, s, false, id, prevaction);
+                /* add totalshots for other clients */
+                int newshots = guns[s->gunselect].damage*(s->quadmillis ? 4 : 1)*guns[s->gunselect].rays;
+                
+                if ( s!=player1 ) s->totalshots += newshots;
+                
+                switch(s->gunselect)
+                {
+                    case GUN_FIST: s->fistshots += newshots; break;
+                    case GUN_SG: s->sgshots += newshots; break;
+                    case GUN_CG: s->cgshots += newshots; break;
+                    case GUN_RL: s->rlshots += newshots; break;
+                    case GUN_RIFLE: s->rishots += newshots; break;
+                    case GUN_GL: s->glshots += newshots; break;
+                    case GUN_PISTOL: s->pistolshots += newshots; break;
+                }
                 break;
             }
 
@@ -1487,6 +1503,7 @@ namespace game
                 explodeeffects(gun, e, false, id);
                 break;
             }
+
             case N_DAMAGE:
             {
                 int tcn = getint(p),
@@ -1499,6 +1516,24 @@ namespace game
                 if(!target || !actor) break;
                 target->armour = armour;
                 target->health = health;
+
+                if (actor != player1 && actor != target)
+                {
+                    if( (actor!=target) ) actor->totaldamage += damage;
+                    else if( isteam(actor->team, target->team) && (actor != target) ) actor->totaldamage += damage; // count self caused teamdamage to totaldamage
+                }
+
+                if ((actor != player1 || target != player1) && actor != target) switch (actor->gunselect)
+                {
+                    case GUN_FIST: actor->fistdamage += damage; break;
+                    case GUN_SG: actor->sgdamage += damage; break;
+                    case GUN_CG: actor->cgdamage += damage; break;
+                    case GUN_RL: actor->rldamage += damage; break;
+                    case GUN_RIFLE: actor->ridamage += damage; break;
+                    case GUN_GL: actor->gldamage += damage; break;
+                    case GUN_PISTOL: actor->pistoldamage += damage; break;
+                }
+                
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false);
                 break;
@@ -1528,6 +1563,7 @@ namespace game
                     particle_textcopy(actor->abovehead(), ds, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
                 }
                 if(!victim) break;
+                if(victim!=player1) victim->deaths += 1;
                 killed(victim, actor);
                 break;
             }
