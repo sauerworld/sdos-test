@@ -2342,7 +2342,7 @@ namespace server
         ci->timesync = false;
     }
 
-    VAR(demo_jumps, 0, 0, 600);
+    VAR(demo_jumps, -600, 0, 600);
 
     void serverupdate()
     {
@@ -2353,7 +2353,7 @@ namespace server
 
             if(m_demo)
             {
-            	if ( !(demo_jumps == 0) )
+            	if ( demo_jumps )
             	{
             		gamemillis+=(demo_jumps*1000);
             		readdemo(curtime + (demo_jumps*1000));

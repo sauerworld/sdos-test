@@ -1134,6 +1134,7 @@ void particle_splash(int type, int num, int fade, const vec &p, int color, float
 }
 
 VARP(maxtrail, 1, 500, 10000);
+XIDENT(IDF_SWLACC, VARP, smoothrays, 0, 0, 1);
 
 void particle_trail(int type, int fade, const vec &s, const vec &e, int color, float size, int gravity)
 {
@@ -1146,7 +1147,7 @@ void particle_trail(int type, int fade, const vec &s, const vec &e, int color, f
     loopi(steps)
     {
         p.add(v);
-        vec tmp = vec(float(rnd(11)-5), float(rnd(11)-5), float(rnd(11)-5));
+        vec tmp = smoothrays ?  vec(float(1), float(1), float(1)) :	vec(float(rnd(11)-5), float(rnd(11)-5), float(rnd(11)-5));
         newparticle(p, tmp, rnd(fade)+fade, type, color, size, gravity);
     }
 }
@@ -1160,6 +1161,20 @@ void particle_text(const vec &s, const char *t, int type, int fade, int color, f
     if(!particletext || camera1->o.dist(s) > maxparticletextdistance) return;
     particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
     p->text = t;
+}
+
+// credit to alebrije
+// added: new function for display healt and armour bars.
+//        some mix between particle_textcopy and particle_meter.
+void particle_health(const vec &s, float val, int type, int fade, int color, int color2, float size)
+{
+    if(!canaddparticles()) return;
+    if(!particletext || camera1->o.dist(s) > maxparticletextdistance) return;
+    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size);
+    p->color2[0] = color2>>16;
+    p->color2[1] = (color2>>8)&0xFF;
+    p->color2[2] = color2&0xFF;
+    p->progress = clamp(int(val*100), 0, 100);
 }
 
 void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity)

@@ -471,7 +471,8 @@ struct ctfclientmode : clientmode
         vec dir = d->o;
         dir.sub(pos).div(scale);
         float size = flagblip ? 0.1f : 0.05f,
-              xoffset = flagblip ? -2*(3/32.0f)*size : -size,
+              //xoffset = flagblip ? -2*(3/32.0f)*size : -size,
+        	  xoffset = -size, // flat gui
               yoffset = flagblip ? -2*(1 - 3/32.0f)*size : -size,
               dist = dir.magnitude2(), maxdist = 1 - 0.05f - 0.05f;
         if(dist >= maxdist) dir.mul(maxdist/dist);

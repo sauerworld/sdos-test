@@ -6,6 +6,7 @@
 #include "engine.h"
 
 #include "textedit.h"
+#include "colors.h" // flat gui
 
 static bool layoutpass, actionon = false;
 static int mousebuttons = 0;
@@ -212,7 +213,45 @@ struct gui : g3d_gui
     int button(const char *text, int color, const char *icon) { autotab(); return button_(text, color, icon, true, false); }
     int title (const char *text, int color, const char *icon) { autotab(); return button_(text, color, icon, false, true); }
 
-    void separator() { autotab(); line_(FONTH/3); }
+    //void separator() { autotab(); line_(FONTH/3); }
+    void separator() {
+            autotab();
+
+            line_(2);
+
+    /*
+            if(visible()) // flat gui
+            {
+
+                lineshader->set();
+                glDisable(GL_TEXTURE_2D);
+                glDisable(GL_BLEND);
+
+                glColor3f(0.5, 0.5, 0.5);
+
+                glLineWidth(2);
+                glBegin(GL_LINE_STRIP);
+                if(ishorizontal()) {
+                    glVertex2f(curx + FONTH/2, cury + ysize);
+                    glVertex2f(curx + FONTH/2, cury + ysize);
+                } else {
+                    glVertex2f(curx, cury + FONTH*0.33);
+                    glVertex2f(curx + xsize, cury + FONTH*0.33);
+                }
+                glEnd();
+                glLineWidth(1);
+
+                glEnable(GL_TEXTURE_2D);
+                glEnable(GL_BLEND);
+                defaultshader->set();
+
+                xtraverts += 4;
+            }
+
+            layout(ishorizontal() ? FONTH*0.75 : 0, ishorizontal() ? 0 : (FONTH*0.66) - 2);
+            */
+        }
+
     void progress(float percent) { autotab(); line_((FONTH*4)/5, percent); }
 
     //use to set min size (useful when you have progress bars)
@@ -430,7 +469,8 @@ struct gui : g3d_gui
         autotab();
         int x = curx;
         int y = cury;
-        line_((FONTH*2)/3);
+        //line_((FONTH*2)/3);
+        line_(8); // flat gui
         if(visible())
         {
             if(!label) label = intstr(val);
@@ -451,7 +491,8 @@ struct gui : g3d_gui
                 py = y;
             }
 
-            if(hit) color = 0xFF0000;
+            //if(hit) color = 0xFF0000;
+            if(hit) color = COL_RED; // flat gui
             text_(label, px, py, color, hit && actionon, hit);
             if(hit && actionon)
             {
@@ -528,15 +569,20 @@ struct gui : g3d_gui
             } 
             else fieldsactive = true;
             
-            e->draw(curx+FONTW/2, cury, color, hit && editing);
+            //e->draw(curx+FONTW/2, cury, color, hit && editing);
+            e->draw(curx+FONTW/4, cury, color, hit && editing); // flat gui
             
             lineshader->set();
             holdscreenlock;
             glDisable(GL_TEXTURE_2D);
             glDisable(GL_BLEND);
-            if(editing) glColor3f(1, 0, 0);
+            /* if(editing) glColor3f(1, 0, 0);
             else glColor3ub(color>>16, (color>>8)&0xFF, color&0xFF);
-            rect_(curx, cury, w, h, true);
+            rect_(curx, cury, w, h, true); */
+            if(editing) glColor3f(1, 1, 1); // flat gui start
+            else glColor3f(0.5f, 0.5f, 0.5f);
+            if(e->maxy==1) onelinefield_(curx, cury, w, h);
+            else rect_(curx, cury, w, h, true); // flat gui end
             glEnable(GL_TEXTURE_2D);
             glEnable(GL_BLEND);
             defaultshader->set();
@@ -557,6 +603,20 @@ struct gui : g3d_gui
         
         return result;
     }
+
+    // flat gui
+	void onelinefield_(float x, float y, float w, float h)
+	{
+		glLineWidth(2);
+		glBegin(GL_LINE_STRIP);
+		glVertex2f(x, y + (h*0.8));
+		glVertex2f(x, y + h);
+		glVertex2f(x + w, y + h);
+		glVertex2f(x + w, y + (h*0.8));
+		glEnd();
+		glLineWidth(1);
+		xtraverts += 4;
+	}
 
     void rect_(float x, float y, float w, float h, bool lines = false)
     {
@@ -736,22 +796,53 @@ struct gui : g3d_gui
     {		
         if(visible())
         {
-            if(!slidertex) slidertex = textureload("data/guislider.png", 3);
+            /*if(!slidertex) slidertex = textureload("data/guislider.png", 3);
             holdscreenlock;
-            glBindTexture(GL_TEXTURE_2D, slidertex->id);
+            glBindTexture(GL_TEXTURE_2D, slidertex->id); */
+			lineshader->set(); // flat gui start
+			glDisable(GL_TEXTURE_2D);
+			glDisable(GL_BLEND);
+			glLineWidth(size); //flat gui end
             if(percent < 0.99f) 
             {
-                glColor4f(light.x, light.y, light.z, 0.375f);
+                /*glColor4f(light.x, light.y, light.z, 0.375f);
                 if(ishorizontal()) 
                     rect_(curx + FONTH/2 - size/2, cury, size, ysize, 0);
                 else
-                    rect_(curx, cury + FONTH/2 - size/2, xsize, size, 1);
-            }
-            glColor3fv(light.v);
+                    rect_(curx, cury + FONTH/2 - size/2, xsize, size, 1);*/
+            	glColor4f(light.x, light.y, light.z, 0.35f); // flat gui start
+				glBegin(GL_LINE_STRIP);
+				if(ishorizontal()) {
+					glVertex2f(curx + (FONTH/2) - (size/2), cury + ysize);
+					glVertex2f(curx + (FONTH/2) - (size/2), cury + ysize);
+				} else {
+					glVertex2f(curx, cury + (FONTH/2) + 1);
+					glVertex2f(curx + xsize, cury + (FONTH/2) + 1); // flat gui end
+				}
+            /*glColor3fv(light.v);
             if(ishorizontal()) 
                 rect_(curx + FONTH/2 - size/2, cury + ysize*(1-percent), size, ysize*percent, 0);
             else 
-                rect_(curx, cury + FONTH/2 - size/2, xsize*percent, size, 1);
+                rect_(curx, cury + FONTH/2 - size/2, xsize*percent, size, 1);*/
+				glEnd();
+			}
+            // flat gui start
+			glColor3f(light.x * 0.5f, light.y * 0.5f, light.z * 0.5f);
+			glBegin(GL_LINE_STRIP);
+			if(ishorizontal()) {
+				glVertex2f(curx + (FONTH/2) - (size/2), cury + (ysize)*(1-percent));
+				glVertex2f(curx + (FONTH/2) - (size/2), cury + (ysize)*percent);
+			} else {
+				glVertex2f(curx, cury + (FONTH/2) + 1);
+				glVertex2f(curx + xsize*percent, cury + (FONTH/2) + 1);
+			}
+			glEnd();
+
+			glLineWidth(1);
+
+			glEnable(GL_TEXTURE_2D);
+			glEnable(GL_BLEND);
+			defaultshader->set(); // flat gui end
         }
         layout(ishorizontal() ? FONTH : 0, ishorizontal() ? 0 : FONTH);
     }
@@ -778,7 +869,8 @@ struct gui : g3d_gui
         if(visible())
         {
             bool hit = ishit(w, FONTH);
-            if(hit && clickable) color = 0xFF0000;	
+            //if(hit && clickable) color = 0xFF0000;
+            if(hit && clickable) color = COL_RED; // flat gui
             int x = curx;	
             if(isvertical() && center) x += (xsize-w)/2;
         
@@ -923,7 +1015,8 @@ struct gui : g3d_gui
         tx = 0;
         ty = 0;
         tcurrent = tab;
-        tcolor = 0xFFFFFF;
+        //tcolor = 0xFFFFFF;
+        tcolor = COL_WHITE; // flat gui
         pushlist();
         if(layoutpass) 
         {

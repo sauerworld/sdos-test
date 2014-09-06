@@ -1,10 +1,14 @@
 // menus.cpp: ingame menu system (also used for scores and serverlist)
 
 #include "engine.h"
+#include "colors.h" // flat gui
 
-#define GUI_TITLE_COLOR  0xFFDD88
+/*#define GUI_TITLE_COLOR  0xFFDD88
 #define GUI_BUTTON_COLOR 0xFFFFFF
-#define GUI_TEXT_COLOR   0xDDFFDD
+#define GUI_TEXT_COLOR   0xDDFFDD*/
+#define GUI_TITLE_COLOR  COL_WHITE // flat gui
+#define GUI_BUTTON_COLOR COL_WHITE // flat gui
+#define GUI_TEXT_COLOR   COL_WHITE // flat gui
 
 static vec menupos;
 static int menustart = 0;
@@ -295,7 +299,8 @@ void guicolor(int *color)
 
 void guitextbox(char *text, int *width, int *height, int *color)
 {
-    if(cgui && text[0]) cgui->textbox(text, *width ? *width : 12, *height ? *height : 1, *color ? *color : 0xFFFFFF);
+    //if(cgui && text[0]) cgui->textbox(text, *width ? *width : 12, *height ? *height : 1, *color ? *color : 0xFFFFFF);
+	if(cgui && text[0]) cgui->textbox(text, *width ? *width : 12, *height ? *height : 1, *color ? *color : COL_WHITE);
 }
 
 void guitext(char *name, char *icon)

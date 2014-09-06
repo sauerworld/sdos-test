@@ -1,4 +1,5 @@
 #include "game.h"
+#include "colors.h"
 
 extern int multipoll;
 
@@ -443,8 +444,8 @@ namespace game
         }
         else
         {
-            if(d==player1) conoutf(contype, "\f2%s got fragged by %s", dname, aname);
-            else conoutf(contype, "\f2%s fragged %s", aname, dname);
+            if(d==player1) conoutf(contype, "\f2%s got fragged by %s's mighty \f0%s", dname, aname, guns[d->gunselect].name);
+            else conoutf(contype, "\f2%s fragged %s with your mighty \f0%s", aname, dname, guns[d->gunselect].name);
         }
         deathstate(d);
 		ai::killed(d, actor);
@@ -906,10 +907,12 @@ namespace game
                 {
                     color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
                     if(f->state==CS_DEAD) color = (color>>1)&0x7F7F7F;
-                    color = f->state!=CS_DEAD ? 0xFFFFFF : 0x606060;
+                    //color = f->state!=CS_DEAD ? 0xFFFFFF : 0x606060;
+                    color = f->state!=CS_DEAD ? COL_WHITE : COL_DEAD; // flat gui
                     if(f->privilege)
                     {
-                        color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                        //color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                    	color = f->privilege>=PRIV_ADMIN ? COL_ADMIN : COL_MASTER; // flat gui
                         if(f->state==CS_DEAD) color = (color>>1)&0x7F7F7F;
                     }
                 }
@@ -1031,7 +1034,8 @@ namespace game
         static const float struts[] =       { 7,       7,          12.5f,   14,      7,      8,         14,      7,       24.5f };
         if(size_t(i) >= sizeof(names)/sizeof(names[0])) return false;
         g->pushlist();
-        g->text(names[i], 0xFFFF80, !i ? " " : NULL);
+        // g->text(names[i], 0xFFFF80, !i ? " " : NULL);
+        g->text(names[i], COL_GREY, !i ? " " : NULL);
         if(struts[i]) g->strut(struts[i]);
         g->mergehits(true);
         return true;
@@ -1061,7 +1065,8 @@ namespace game
             switch(i)
             {
                 case 0:
-                    if(g->button(" ", 0xFFFFDD, "serverunk")&G3D_UP) return true;
+                    // if(g->button(" ", 0xFFFFDD, "serverunk")&G3D_UP) return true;
+                	if(g->button(" ", COL_WHITE, "serverunk")&G3D_UP) return true; // flat gui
                     break;
 
                 case 1:
@@ -1069,23 +1074,28 @@ namespace game
                 case 3:
                 case 4:
                 case 5:
-                    if(g->button(" ", 0xFFFFDD)&G3D_UP) return true;
+                    //if(g->button(" ", 0xFFFFDD)&G3D_UP) return true;
+                	if(g->button(" ", COL_WHITE)&G3D_UP) return true; // flat gui
                     break;
 
                 case 6:
-                    if(g->buttonf("%s ", 0xFFFFDD, NULL, name)&G3D_UP) return true;
+                    //if(g->buttonf("%s ", 0xFFFFDD, NULL, name)&G3D_UP) return true;
+                	if(g->buttonf("%s ", COL_WHITE, NULL, name)&G3D_UP) return true; // flat gui
                     break;
 
                 case 7:
-                    if(g->buttonf("%d ", 0xFFFFDD, NULL, port)&G3D_UP) return true;
+                    //if(g->buttonf("%d ", 0xFFFFDD, NULL, port)&G3D_UP) return true;
+                	if(g->buttonf("%d ", COL_WHITE, NULL, port)&G3D_UP) return true; // flat gui
                     break;
 
                 case 8:
                     if(ping < 0)
                     {
-                        if(g->button(sdesc, 0xFFFFDD)&G3D_UP) return true;
+                        //if(g->button(sdesc, 0xFFFFDD)&G3D_UP) return true;
+                    	if(g->button(sdesc, COL_WHITE)&G3D_UP) return true; // flat gui
                     }
-                    else if(g->buttonf("[%s protocol] ", 0xFFFFDD, NULL, attr.empty() ? "unknown" : (attr[0] < PROTOCOL_VERSION ? "older" : "newer"))&G3D_UP) return true;
+                    //else if(g->buttonf("[%s protocol] ", 0xFFFFDD, NULL, attr.empty() ? "unknown" : (attr[0] < PROTOCOL_VERSION ? "older" : "newer"))&G3D_UP) return true;
+                    else if(g->buttonf("[%s protocol] ", COL_WHITE, NULL, attr.empty() ? "unknown" : (attr[0] < PROTOCOL_VERSION ? "older" : "newer"))&G3D_UP) return true; // flat gui
                     break;
             }
             return false;
@@ -1096,24 +1106,29 @@ namespace game
             case 0:
             {
                 const char *icon = attr.inrange(3) && np >= attr[3] ? "serverfull" : (attr.inrange(4) ? mastermodeicon(attr[4], "serverunk") : "serverunk");
-                if(g->buttonf("%d ", 0xFFFFDD, icon, ping)&G3D_UP) return true;
+                //if(g->buttonf("%d ", 0xFFFFDD, icon, ping)&G3D_UP) return true;
+                if(g->buttonf("%d ", COL_WHITE, icon, ping)&G3D_UP) return true; // flat gui
                 break;
             }
 
             case 1:
                 if(attr.length()>=4)
                 {
-                    if(g->buttonf(np >= attr[3] ? "\f3%d/%d " : "%d/%d ", 0xFFFFDD, NULL, np, attr[3])&G3D_UP) return true;
+                    //if(g->buttonf(np >= attr[3] ? "\f3%d/%d " : "%d/%d ", 0xFFFFDD, NULL, np, attr[3])&G3D_UP) return true;
+                	if(g->buttonf(np >= attr[3] ? "\f3%d/%d " : "%d/%d ", COL_WHITE, NULL, np, attr[3])&G3D_UP) return true; // flat gui
                 }
-                else if(g->buttonf("%d ", 0xFFFFDD, NULL, np)&G3D_UP) return true;
+                //else if(g->buttonf("%d ", 0xFFFFDD, NULL, np)&G3D_UP) return true;
+                else if(g->buttonf("%d ", COL_WHITE, NULL, np)&G3D_UP) return true; // flat gui
                 break;
 
             case 2:
-                if(g->buttonf("%s ", 0xFFFFDD, NULL, attr.length()>=2 ? server::modename(attr[1], "") : "")&G3D_UP) return true;
+                //if(g->buttonf("%s ", 0xFFFFDD, NULL, attr.length()>=2 ? server::modename(attr[1], "") : "")&G3D_UP) return true;
+            	if(g->buttonf("%s ", COL_WHITE, NULL, attr.length()>=2 ? server::modename(attr[1], "") : "")&G3D_UP) return true;
                 break;
 
             case 3:
-                if(g->buttonf("%.25s ", 0xFFFFDD, NULL, map)&G3D_UP) return true;
+                //if(g->buttonf("%.25s ", 0xFFFFDD, NULL, map)&G3D_UP) return true;
+            	if(g->buttonf("%.25s ", COL_WHITE, NULL, map)&G3D_UP) return true; // flat gui
                 break;
 
             case 4:
@@ -1122,24 +1137,30 @@ namespace game
                     int secs = clamp(attr[2], 0, 59*60+59),
                         mins = secs/60;
                     secs %= 60;
-                    if(g->buttonf("%d:%02d ", 0xFFFFDD, NULL, mins, secs)&G3D_UP) return true;
+                    //if(g->buttonf("%d:%02d ", 0xFFFFDD, NULL, mins, secs)&G3D_UP) return true;
+                    if(g->buttonf("%d:%02d ", COL_WHITE, NULL, mins, secs)&G3D_UP) return true; // flat gui
                 }
-                else if(g->buttonf(" ", 0xFFFFDD)&G3D_UP) return true;
+                //else if(g->buttonf(" ", 0xFFFFDD)&G3D_UP) return true;
+                else if(g->buttonf(" ", COL_WHITE)&G3D_UP) return true; // flat gui
                 break;
             case 5:
-                if(g->buttonf("%s%s ", 0xFFFFDD, NULL, attr.length()>=5 ? mastermodecolor(attr[4], "") : "", attr.length()>=5 ? server::mastermodename(attr[4], "") : "")&G3D_UP) return true;
+                //if(g->buttonf("%s%s ", 0xFFFFDD, NULL, attr.length()>=5 ? mastermodecolor(attr[4], "") : "", attr.length()>=5 ? server::mastermodename(attr[4], "") : "")&G3D_UP) return true;
+            	if(g->buttonf("%s%s ", COL_WHITE, NULL, attr.length()>=5 ? mastermodecolor(attr[4], "") : "", attr.length()>=5 ? server::mastermodename(attr[4], "") : "")&G3D_UP) return true; // flat gui
                 break;
 
             case 6:
-                if(g->buttonf("%s ", 0xFFFFDD, NULL, name)&G3D_UP) return true;
+                //if(g->buttonf("%s ", 0xFFFFDD, NULL, name)&G3D_UP) return true;
+            	if(g->buttonf("%s ", COL_WHITE, NULL, name)&G3D_UP) return true; // flat gui
                 break;
 
             case 7:
-                if(g->buttonf("%d ", 0xFFFFDD, NULL, port)&G3D_UP) return true;
+                //if(g->buttonf("%d ", 0xFFFFDD, NULL, port)&G3D_UP) return true;
+                if(g->buttonf("%d ", COL_WHITE, NULL, port)&G3D_UP) return true; // flat gui
                 break;
 
             case 8:
-                if(g->buttonf("%.25s", 0xFFFFDD, NULL, sdesc)&G3D_UP) return true;
+                //if(g->buttonf("%.25s", 0xFFFFDD, NULL, sdesc)&G3D_UP) return true;
+                if(g->buttonf("%.25s", COL_WHITE, NULL, sdesc)&G3D_UP) return true; // flat gui
                 break;
         }
         return false;
@@ -1159,5 +1180,33 @@ namespace game
     {
         execfile("auth.cfg", false);
     }
+
+    void concatgamedesc(char* name, size_t maxlen)
+    {
+       string buff;
+               time_t rawtime;
+               tm* timeinfo;
+               time(&rawtime);
+               timeinfo = localtime(&rawtime);
+               strftime(buff, sizeof(buff), "%Y-%m-%d-%H-%M-%S__", timeinfo);
+               concatstring(name, buff, maxlen);
+
+       if(!remote) concatstring(name, "local", maxlen);
+       else{
+               if(servinfo[0]){
+                       copystring(buff, servinfo);
+                       filtertext(buff, buff);
+                       char* ch=buff;
+                       while((ch=strpbrk(ch, " /\\:?<>\"|*"))) *ch='_';        //windows is the pickiest, but apply to OSX and Linux f
+                       concatstring(name, buff, maxlen);
+                       concatstring(name, "__", maxlen);
+               }
+               enet_address_get_host_ip(connectedpeer(), buff, sizeof(buff));
+               concatstring(name, buff, maxlen);
+               formatstring(buff)("_%d", connectedpeer()->port);
+               concatstring(name, buff, maxlen);
+       }
+    }
+
 }
 

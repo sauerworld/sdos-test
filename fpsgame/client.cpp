@@ -1,4 +1,5 @@
 #include "game.h"
+#include "cdemo.h"
 
 extern int identflags;
 
@@ -598,6 +599,7 @@ namespace game
         putint(p, inlen);
         putint(p, outlen);
         if(outlen > 0) p.put(outbuf, outlen);
+        cdemo::clipboard(inlen, outlen, outbuf);
         sendclientpacket(p.finalize(), 1);
         needclipboard = -1;
     }
@@ -796,6 +798,7 @@ namespace game
         int num = nums || numf ? 0 : numi, msgsize = server::msgsizelookup(type);
         if(msgsize && num!=msgsize) { fatal("inconsistent msg size for %d (%d != %d)", type, num, msgsize); }
         if(reliable) messagereliable = true;
+        cdemo::addmsghook(type, mcn, p);
         if(mcn != messagecn)
         {
             static uchar mbuf[16];
@@ -864,6 +867,7 @@ namespace game
     {
         remote = _remote;
         if(editmode) toggleedit();
+        cdemo::stop();
     }
 
     void gamedisconnect(bool cleanup)
@@ -891,13 +895,13 @@ namespace game
             nextmode = gamemode = INT_MAX;
             clientmap[0] = '\0';
         }
-        sdos::resetauth();
+        sdos::resetauth(); cdemo::stop();
     }
 
     void toserver(char *text) { conoutf(CON_CHAT, "%s:\f0 %s", chatcolorname(player1), text); addmsg(N_TEXT, "rcs", player1, text); }
     COMMANDN(say, toserver, "C");
 
-    void sayteam(char *text) { conoutf(CON_TEAMCHAT, "%s:\f6 %s", chatcolorname(player1), text); addmsg(N_SAYTEAM, "rcs", player1, text); }
+    void sayteam(char *text) { conoutf(CON_TEAMCHAT, "%s:\f6 %s", chatcolorname(player1), text); addmsg(N_SAYTEAM, "rcs", player1, text); cdemo::sayteam(text); }
     COMMAND(sayteam, "C");
 
     ICOMMAND(servcmd, "C", (char *cmd), addmsg(N_SERVCMD, "rs", cmd));
@@ -962,7 +966,7 @@ namespace game
         if(d->state != CS_ALIVE && d->state != CS_EDITING) return;
         packetbuf q(100, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
         sendposition(d, q);
-        sendclientpacket(q.finalize(), 0);
+        sendclientpacket(cdemo::packet(0, q.finalize()), 0);
     }
 
     void sendpositions()
@@ -980,7 +984,7 @@ namespace game
                     if((d == player1 || d->ai) && (d->state == CS_ALIVE || d->state == CS_EDITING))
                         sendposition(d, q);
                 }
-                sendclientpacket(q.finalize(), 0);
+                sendclientpacket(cdemo::packet(0, q.finalize()), 0);
                 break;
             }
         }
@@ -1228,7 +1232,7 @@ namespace game
     {
         static char text[MAXTRANS];
         int type;
-        bool mapchanged = false, demopacket = false;
+        bool mapchanged = false, demopacket = false, welcomepacket = false, skipcdemorecord = false;
 
         while(p.remaining()) switch(type = getint(p))
         {
@@ -1236,6 +1240,7 @@ namespace game
 
             case N_SERVINFO:                   // welcome messsage from the server
             {
+                skipcdemorecord = true;
                 int mycn = getint(p), prot = getint(p);
                 if(prot!=PROTOCOL_VERSION)
                 {
@@ -1256,6 +1261,7 @@ namespace game
             {
                 connected = true;
                 notifywelcome();
+                welcomepacket = true;
                 break;
             }
 
@@ -1325,11 +1331,13 @@ namespace game
             }
 
             case N_MAPCHANGE:
+                cdemo::stop();
                 getstring(text, p);
                 changemapserv(text, getint(p));
                 mapchanged = true;
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;
+                if(!welcomepacket && cdemo::cdemoauto) cdemo::setup();
                 break;
 
             case N_FORCEDEATH:
@@ -1519,8 +1527,8 @@ namespace game
 
                 if (actor != player1 && actor != target)
                 {
-                    if( (actor!=target) ) actor->totaldamage += damage;
-                    else if( isteam(actor->team, target->team) && (actor != target) ) actor->totaldamage += damage; // count self caused teamdamage to totaldamage
+                    if( (actor!=target) ) { actor->totaldamage += damage; target->damagereceived += damage;}
+                    else if( isteam(actor->team, target->team) && (actor != target) ) { actor->totaldamage += damage; target->damagereceived += damage; }// count self caused teamdamage to totaldamage
                 }
 
                 if ((actor != player1 || target != player1) && actor != target) switch (actor->gunselect)
@@ -1565,6 +1573,7 @@ namespace game
                 if(!victim) break;
                 if(victim!=player1) victim->deaths += 1;
                 killed(victim, actor);
+                if(victim==actor) victim->suicides += 1;
                 break;
             }
 
@@ -1730,6 +1739,7 @@ namespace game
                 putint(cping, N_CLIENTPING);
                 putint(cping, player1->ping = (player1->ping*5+totalmillis-getint(p))/6);
                 sendclientpacket(cping.finalize(), 1);
+                skipcdemorecord = true;
             }
 
             case N_CLIENTPING:
@@ -1748,6 +1758,7 @@ namespace game
 
             case N_SENDDEMOLIST:
             {
+                skipcdemorecord = true;
                 int demos = getint(p);
                 if(demos <= 0) conoutf("no demos available");
                 else loopi(demos)
@@ -1894,6 +1905,7 @@ namespace game
 
             case N_AUTHCHAL:
             {
+                skipcdemorecord = true;
                 getstring(text, p);
                 authkey *a = findauthkey(text);
                 uint id = (uint)getint(p);
@@ -1936,6 +1948,7 @@ namespace game
                 else if(servcmd(sdos_authans)) sdos::authans(data);
                 else if(servcmd(sdos_exec)) sdos::execute(data);
 #undef servcmd
+                skipcdemorecord = true;
                 break;
             }
 
@@ -1943,6 +1956,8 @@ namespace game
                 neterr("type", cn < 0);
                 return;
         }
+        if(welcomepacket && cdemo::cdemoauto) cdemo::setup();
+        if(!skipcdemorecord) cdemo::packet(1, p);
     }
 
     void receivefile(packetbuf &p)
@@ -1991,6 +2006,7 @@ namespace game
         {
             case 0:
                 parsepositions(p);
+                cdemo::packet(0, p);
                 break;
 
             case 1:
@@ -2105,3 +2121,71 @@ namespace game
     COMMAND(gotosel, "");
 }
 
+namespace cdemo{
+
+using namespace game;
+
+void ctfinit(ucharbuf& p){
+    typedef ctfclientmode::flag flag;
+    putint(p, N_INITFLAGS);
+    loopk(2) putint(p, ctfmode.scores[k]);
+    putint(p, ctfmode.flags.length());
+    loopv(ctfmode.flags){
+        flag &f = ctfmode.flags[i];
+        putint(p, f.version);
+        putint(p, f.spawnindex);
+        putint(p, f.owner ? int(f.owner->clientnum) : -1);
+        putint(p, f.vistime ? 0 : 1);
+        if(!f.owner){
+            putint(p, f.droptime ? 1 : 0);
+            if(f.droptime) loopi(3) putint(p, int(f.droploc[i]*DMF));
+        }
+    }
+}
+
+void captureinit(ucharbuf& p){
+    typedef captureclientmode::score score;
+    typedef captureclientmode::baseinfo baseinfo;
+    loopv(capturemode.scores){
+        score &cs = capturemode.scores[i];
+        putint(p, N_BASESCORE);
+        putint(p, -1);
+        sendstring(cs.team, p);
+        putint(p, cs.total);
+    }
+    putint(p, N_BASES);
+    putint(p, capturemode.bases.length());
+    loopv(capturemode.bases){
+        baseinfo &b = capturemode.bases[i];
+        putint(p, min(max(b.ammotype, 1), I_CARTRIDGES+1));
+        sendstring(b.owner, p);
+        sendstring(b.enemy, p);
+        putint(p, b.converted);
+        putint(p, b.ammo);
+    }
+}
+
+void collectinit(ucharbuf& p){
+    typedef collectclientmode::token token;
+    putint(p, N_INITTOKENS);
+    loopk(2) putint(p, collectmode.scores[k]);
+    putint(p, collectmode.tokens.length());
+    loopv(collectmode.tokens)
+    {
+        token &t = collectmode.tokens[i];
+        putint(p, t.id);
+        putint(p, t.team);
+        putint(p, t.yaw);
+        putint(p, int(t.o.x*DMF));
+        putint(p, int(t.o.y*DMF));
+        putint(p, int(t.o.z*DMF));
+    }
+    loopv(players) if(players[i]->state == CS_ALIVE && players[i]->tokens > 0)
+    {
+        putint(p, players[i]->clientnum);
+        putint(p, players[i]->tokens);
+    }
+    putint(p, -1);
+}
+
+}

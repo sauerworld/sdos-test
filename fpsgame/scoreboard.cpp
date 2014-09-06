@@ -1,5 +1,6 @@
 // creation of scoreboard
 #include "game.h"
+#include "colors.h"
 
 namespace game
 {
@@ -13,10 +14,15 @@ namespace game
     VARP(showconnecting, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, showfrags, 0, 1, 1);
     XIDENT(IDF_SWLACC, VARP, showflags, 0, 1, 1);
-    XIDENT(IDF_SWLACC, VARP, showdamagedealt, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, showdamagedealt, 0, 0, 2);
+    XIDENT(IDF_SWLACC, VARP, showdamagereceived, 0, 0, 2);
     XIDENT(IDF_SWLACC, VARP, showaccuracy, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, showdeaths, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, showsuicides, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, showkpd, 0, 0, 1);
 
-    static hashset<teaminfo> teaminfos;
+
+    hashset<teaminfo> teaminfos;
 
     void clearteaminfo()
     {
@@ -145,34 +151,42 @@ namespace game
             string hostname;
             if(enet_address_get_host_ip(address, hostname, sizeof(hostname)) >= 0)
             {
-                if(servinfo[0]) g.titlef("%.25s", 0xFFFF80, NULL, servinfo);
-                else g.titlef("%s:%d", 0xFFFF80, NULL, hostname, address->port);
+                /*if(servinfo[0]) g.titlef("%.25s", 0xFFFF80, NULL, servinfo);
+                else g.titlef("%s:%d", 0xFFFF80, NULL, hostname, address->port);*/
+            	if(servinfo[0]) g.titlef("%.25s", COL_WHITE, NULL, servinfo); // flat gui
+            	else g.titlef("%s:%d", COL_WHITE, NULL, hostname, address->port); // flat gui
             }
         }
      
         g.pushlist();
         g.spring();
-        g.text(server::modename(gamemode), 0xFFFF80);
+        //g.text(server::modename(gamemode), 0xFFFF80);
+        g.text(server::modename(gamemode), COL_WHITE); // flat gui
         g.separator();
         const char *mname = getclientmap();
-        g.text(mname[0] ? mname : "[new map]", 0xFFFF80);
+        //g.text(mname[0] ? mname : "[new map]", 0xFFFF80);
+        g.text(mname[0] ? mname : "[new map]", COL_WHITE); //flat gui
         extern int gamespeed;
-        if(gamespeed != 100) { g.separator(); g.textf("%d.%02dx", 0xFFFF80, NULL, gamespeed/100, gamespeed%100); }
+        //if(gamespeed != 100) { g.separator(); g.textf("%d.%02dx", 0xFFFF80, NULL, gamespeed/100, gamespeed%100); }
+        if(gamespeed != 100) { g.separator(); g.textf("%d.%02dx", COL_WHITE, NULL, gamespeed/100, gamespeed%100); } // flat gui
         if(m_timed && mname[0] && (maplimit >= 0 || intermission))
         {
             g.separator();
-            if(intermission) g.text("intermission", 0xFFFF80);
+            //if(intermission) g.text("intermission", 0xFFFF80);
+            if(intermission) g.text("intermission", COL_WHITE); // flat gui
             else 
             {
                 int secs = max(maplimit-lastmillis, 0)/1000, mins = secs/60;
                 secs %= 60;
                 g.pushlist();
                 g.strut(mins >= 10 ? 4.5f : 3.5f);
-                g.textf("%d:%02d", 0xFFFF80, NULL, mins, secs);
+                //g.textf("%d:%02d", 0xFFFF80, NULL, mins, secs);
+                g.textf("%d:%02d", COL_WHITE, NULL, mins, secs); // flat gui
                 g.poplist();
             }
         }
-        if(ispaused()) { g.separator(); g.text("paused", 0xFFFF80); }
+        //if(ispaused()) { g.separator(); g.text("paused", 0xFFFF80); }
+        if(ispaused()) { g.separator(); g.text("paused", COL_WHITE); } // flat gui
         g.spring();
         g.poplist();
 
@@ -184,8 +198,9 @@ namespace game
             if((k%2)==0) g.pushlist(); // horizontal
             
             scoregroup &sg = *groups[k];
-            int bgcolor = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? 0x3030C0 : 0xC03030) : 0,
-                fgcolor = 0xFFFF80;
+            //int bgcolor = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? 0x3030C0 : 0xC03030) : 0,
+            //    fgcolor = 0xFFFF80;
+            int teamcolor = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? COL_BLUE : COL_RED) : COL_WHITE; // flat gui
 
             g.pushlist(); // vertical
             g.pushlist(); // horizontal
@@ -201,21 +216,26 @@ namespace game
             if(sg.team && m_teammode)
             {
                 g.pushlist();
-                g.background(bgcolor, numgroups>1 ? 3 : 5);
+                //g.background(bgcolor, numgroups>1 ? 3 : 5);
                 g.strut(1);
                 g.poplist();
             }
-            g.text("", 0, " ");
+            //g.text("", 0, " ");
+            g.pushlist(); // flat gui
+			g.strut(1); // flat gui
+			g.poplist(); // flat gui
             loopscoregroup(o,
             {
                 if(o==player1 && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1))
                 {
                     g.pushlist();
-                    g.background(0x808080, numgroups>1 ? 3 : 5);
+                    //g.background(0x808080, numgroups>1 ? 3 : 5);
+                    g.background(0x808080, numgroups>1 ? 2 : 4); // flat gui
                 }
-                const playermodelinfo &mdl = getplayermodelinfo(o);
+                /*const playermodelinfo &mdl = getplayermodelinfo(o);
                 const char *icon = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? mdl.blueicon : mdl.redicon) : mdl.ffaicon;
-                g.text("", 0, icon);
+                g.text("", 0, icon); */
+                g.text("", 0); // flat gui
                 if(o==player1 && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1)) g.poplist();
             });
             g.poplist();
@@ -224,8 +244,10 @@ namespace game
             {
                 g.pushlist(); // vertical
 
-                if(sg.score>=10000) g.textf("%s: WIN", fgcolor, NULL, sg.team);
-                else g.textf("%s: %d", fgcolor, NULL, sg.team, sg.score);
+                /*if(sg.score>=10000) g.textf("%s: WIN", fgcolor, NULL, sg.team);
+                else g.textf("%s: %d", fgcolor, NULL, sg.team, sg.score);*/
+				if(sg.score>=10000) g.textf("%s: WIN", teamcolor, NULL, sg.team); // flat gui
+				else g.textf("%s: %d", teamcolor, NULL, sg.team, sg.score); // flat gui
 
                 g.pushlist(); // horizontal
             }
@@ -234,8 +256,10 @@ namespace game
             {
                g.pushlist();
                g.strut(m_ctf?4:5);
-               g.text(m_ctf?"flags":"skulls", fgcolor);
-               loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->flags));
+               //g.text(m_ctf?"flags":"skulls", fgcolor);
+               g.text(m_ctf?"flags":"skulls", COL_GREY); // flat gui
+               //loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->flags));
+               loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, o->flags)); // flat gui
                g.poplist();
             }
 
@@ -243,8 +267,10 @@ namespace game
             { 
                 g.pushlist();
                 g.strut(5);
-                g.text("frags", fgcolor);
-                loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->frags));
+                //g.text("frags", fgcolor);
+                //loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->frags));
+                g.text("frags", COL_GREY); // flat gui
+                loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, o->frags)); // flat gui
                 g.poplist();
             }
 
@@ -253,30 +279,95 @@ namespace game
 			{
 				g.pushlist();
 				g.strut(5);
-				g.text("dd", fgcolor);
-				loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%d.%dk", 0xFFFFDD, NULL,(o->totaldamage)/1000 ,((o->totaldamage)%1000)/100 ) : g.textf("%d", 0xFFFFDD, NULL,  o->totaldamage));
+				//g.text("dd", fgcolor);
+				g.text("dd", COL_GREY); // flat gui
+				if (showdamagedealt == 1)
+				{
+					//loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%d.%dk", 0xFFFFDD, NULL,(o->totaldamage)/1000 ,((o->totaldamage)%1000)/100 ) : g.textf("%d", 0xFFFFDD, NULL,  o->totaldamage));
+					loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%d.%dk", COL_WHITE, NULL,(o->totaldamage)/1000 ,((o->totaldamage)%1000)/100 ) : g.textf("%d", COL_WHITE, NULL,  o->totaldamage)); // flat gui
+				}
+				else {
+					//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL,  o->totaldamage));
+					loopscoregroup(o, g.textf("%d", COL_WHITE, NULL,  o->totaldamage)); // flat gui
+				}
 				g.poplist();
 			}
-
+			// show damagereceived per player
+			if(showdamagereceived)
+			{
+				g.pushlist();
+				g.strut(5);
+				//g.text("dr", fgcolor);
+				g.text("dr", COL_GREY); // flat gui
+				if (showdamagereceived == 1)
+				{
+					//loopscoregroup(o, o->damagereceived > 1000 ? g.textf("%d.%dk", 0xFFFFDD, NULL,(o->damagereceived)/1000 ,((o->damagereceived)%1000)/100 ) : g.textf("%d", 0xFFFFDD, NULL,  o->damagereceived));
+					loopscoregroup(o, o->damagereceived > 1000 ? g.textf("%d.%dk", COL_WHITE, NULL,(o->damagereceived)/1000 ,((o->damagereceived)%1000)/100 ) : g.textf("%d", COL_WHITE, NULL,  o->damagereceived)); // flat gui
+				}
+				else {
+					//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL,  o->damagereceived));
+					loopscoregroup(o, g.textf("%d", COL_WHITE, NULL,  o->damagereceived)); // flat gui
+				}
+				g.poplist();
+			}
 			// show accuracy per player
 			if(showaccuracy)
 			{
 				g.pushlist();
 				g.strut(5);
-				g.text("acc", fgcolor);
-				loopscoregroup(o, g.textf("%d%%", 0xFFFFDD, NULL, (o->totaldamage*100)/max(o->totalshots, 1)));
+				//g.text("acc", fgcolor);
+				g.text("acc", COL_GREY); // flat gui
+				//loopscoregroup(o, g.textf("%d%%", 0xFFFFDD, NULL, (o->totaldamage*100)/max(o->totalshots, 1)));
+				loopscoregroup(o, g.textf("%d%%", COL_WHITE, NULL, (o->totaldamage*100)/max(o->totalshots, 1))); // flat gui
+				g.poplist();
+			}
+
+			// show death
+			if(showdeaths)
+			{
+				g.pushlist();
+				g.strut(5);
+				//g.text("death", fgcolor);
+				g.text("death", COL_GREY); // flat gui
+				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, (o->deaths)));
+				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, (o->deaths))); // flat gui
+				g.poplist();
+			}
+			// show death
+			if(showsuicides)
+			{
+				g.pushlist();
+				g.strut(5);
+				//g.text("sui", fgcolor);
+				g.text("sui", COL_GREY); // flat gui
+				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, (o->suicides)));
+				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, (o->suicides))); // flat gui
+				g.poplist();
+			}
+			// show kpd
+			if(showkpd)
+			{
+				g.pushlist();
+				g.strut(5);
+				//g.text("K/D", fgcolor);
+				g.text("K/D", COL_GREY); // flat gui
+				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, (o->frags)/(o->deaths)));
+				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, (o->frags)/(o->deaths))); // flat gui
 				g.poplist();
 			}
 
             g.pushlist();
-            g.text("name", fgcolor);
+            //g.text("name", fgcolor);
+            g.text("name", COL_GREY); // flat gui
             g.strut(13);
             loopscoregroup(o, 
             {
-                int status = o->state!=CS_DEAD ? 0xFFFFDD : 0x606060;
+                //int status = o->state!=CS_DEAD ? 0xFFFFDD : 0x606060;
+            	int status = o->state!=CS_DEAD ? COL_WHITE : COL_DEAD; // flat gui
                 if(o->privilege)
                 {
-                    status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                    //status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                    status = o->privilege>=PRIV_ADMIN ? COL_ADMIN : COL_MASTER; // flat gui
                     if(o->state==CS_DEAD) status = (status>>1)&0x7F7F7F;
                 }
                 g.textf("%s ", status, NULL, colorname(o));
@@ -289,11 +380,14 @@ namespace game
                 {
                     g.pushlist();
                     g.strut(5);
-                    g.text("pj", fgcolor);
+                    //g.text("pj", fgcolor);
+                    g.text("pj", COL_GREY); // flat gui
                     loopscoregroup(o,
                     {
-                        if(o->state==CS_LAGGED) g.text("LAG", 0xFFFFDD);
-                        else g.textf("%d", 0xFFFFDD, NULL, o->plag);
+                        /*if(o->state==CS_LAGGED) g.text("LAG", 0xFFFFDD);
+                        else g.textf("%d", 0xFFFFDD, NULL, o->plag);*/
+						if(o->state==CS_LAGGED) g.text("LAG", COL_WHITE); // flat gui
+						else g.textf("%d", COL_WHITE, NULL, o->plag); // flat gui
                     });
                     g.poplist();
                 }
@@ -301,14 +395,17 @@ namespace game
                 if(showping)
                 {
                     g.pushlist();
-                    g.text("ping", fgcolor);
+                    //g.text("ping", fgcolor);
+                    g.text("ping", COL_GREY); // flat gui
                     g.strut(6);
                     loopscoregroup(o,
                     {
                         fpsent *p = o->ownernum >= 0 ? getclient(o->ownernum) : o;
                         if(!p) p = o;
-                        if(!showpj && p->state==CS_LAGGED) g.text("LAG", 0xFFFFDD);
-                        else g.textf("%d", 0xFFFFDD, NULL, p->ping);
+                        /*if(!showpj && p->state==CS_LAGGED) g.text("LAG", 0xFFFFDD);
+                        else g.textf("%d", 0xFFFFDD, NULL, p->ping);*/
+                        if(!showpj && p->state==CS_LAGGED) g.text("LAG", COL_WHITE); // flat gui
+                        else g.textf("%d", COL_WHITE, NULL, p->ping); // flat gui
                     });
                     g.poplist();
                 }
@@ -318,8 +415,10 @@ namespace game
             {
                 g.space(1);
                 g.pushlist();
-                g.text("cn", fgcolor);
-                loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->clientnum));
+                //g.text("cn", fgcolor);
+                g.text("cn", COL_GREY); // flat gui
+                //loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->clientnum));
+                loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, o->clientnum)); // flat gui
                 g.poplist();
             }
             
@@ -332,48 +431,62 @@ namespace game
             g.poplist(); // horizontal
             g.poplist(); // vertical
 
-            if(k+1<numgroups && (k+1)%2) g.space(2);
+            //if(k+1<numgroups && (k+1)%2) g.space(2);
+            if(k+1<numgroups && (k+1)%2) g.space(4); // flat gui
             else g.poplist(); // horizontal
         }
         
         if(showspectators && spectators.length())
         {
+        	g.separator(); // flat gui
+        	g.textf("%d spectator%s", COL_YELLOW, NULL, spectators.length(), spectators.length()!=1 ? "s" : ""); // flat gui
             if(showclientnum || player1->privilege>=PRIV_MASTER)
             {
                 g.pushlist();
                 
                 g.pushlist();
-                g.text("spectator", 0xFFFF80, " ");
+                //g.text("spectator", 0xFFFF80, " ");
+				g.text("name", COL_GREY); // flat gui
+				g.strut(13); // flat gui
                 loopv(spectators) 
                 {
                     fpsent *o = spectators[i];
-                    int status = 0xFFFFDD;
-                    if(o->privilege) status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                    //int status = 0xFFFFDD;
+                    //if(o->privilege) status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                    int status = COL_WHITE; // flat gui
+					if(o->privilege) status = o->privilege>=PRIV_ADMIN ? COL_ADMIN : COL_MASTER; // flat gui
+
                     if(o==player1 && highlightscore)
                     {
                         g.pushlist();
                         g.background(0x808080, 3);
                     }
-                    g.text(colorname(o), status, "spectator");
+                    //g.text(colorname(o), status, "spectator");
+                    g.text(colorname(o), status); // flat gui
                     if(o==player1 && highlightscore) g.poplist();
                 }
                 g.poplist();
 
                 g.space(1);
                 g.pushlist();
-                g.text("cn", 0xFFFF80);
-                loopv(spectators) g.textf("%d", 0xFFFFDD, NULL, spectators[i]->clientnum);
+                //g.text("cn", 0xFFFF80);
+                g.text("cn", COL_GREY); // flat gui
+                //loopv(spectators) g.textf("%d", 0xFFFFDD, NULL, spectators[i]->clientnum);
+                loopv(spectators) g.textf("%d", COL_WHITE, NULL, spectators[i]->clientnum); // flat gui
                 g.poplist();
 
                 if(showping){
                        g.space(1);
                        g.pushlist();
-                       g.text("ping", 0xFFFF80);
+                       //g.text("ping", 0xFFFF80);
+                       g.text("ping", COL_GREY); // flat gui
                        loopv(spectators){
                                fpsent *p = spectators[i]->ownernum >= 0 ? getclient(spectators[i]->ownernum) : spectators[i];
                                if(!p) p = spectators[i];
-                               if(!showpj && p->state==CS_LAGGED) g.text("LAG", 0xFFFFDD);
-                               else g.textf("%d", 0xFFFFDD, NULL, p->ping);
+                               /*if(!showpj && p->state==CS_LAGGED) g.text("LAG", 0xFFFFDD);
+                               else g.textf("%d", 0xFFFFDD, NULL, p->ping);*/
+                               if(!showpj && p->state==CS_LAGGED) g.text("LAG", COL_WHITE); // flat gui
+							   else g.textf("%d", COL_WHITE, NULL, p->ping); // flat gui
                        }
                        g.poplist();
                 }
@@ -382,17 +495,20 @@ namespace game
             }
             else
             {
-                g.textf("%d spectator%s", 0xFFFF80, " ", spectators.length(), spectators.length()!=1 ? "s" : "");
+                // g.textf("%d spectator%s", 0xFFFF80, " ", spectators.length(), spectators.length()!=1 ? "s" : ""); // flat gui
                 loopv(spectators)
                 {
                     if((i%3)==0) 
                     {
                         g.pushlist();
-                        g.text("", 0xFFFFDD, "spectator");
+                        // g.text("", 0xFFFFDD, "spectator"); // flat gui
+                        //g.text("", COL_WHITE, "spectator"); // flat gui
                     }
                     fpsent *o = spectators[i];
-                    int status = 0xFFFFDD;
-                    if(o->privilege) status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                    /*int status = 0xFFFFDD;
+                    if(o->privilege) status = o->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;*/
+                    int status = COL_WHITE; // flat gui
+                    if(o->privilege) status = o->privilege>=PRIV_ADMIN ? COL_ADMIN : COL_MASTER; // flat gui
                     if(o==player1 && highlightscore)
                     {
                         g.pushlist();

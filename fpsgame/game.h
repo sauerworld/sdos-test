@@ -542,7 +542,7 @@ struct fpsent : dynent, fpsstate
     int lasttaunt;
     int lastpickup, lastpickupmillis, lastbase, lastrepammo, flagpickup, tokens;
     vec lastcollect;
-    int frags, flags, deaths, totaldamage, totalshots;
+    int frags, flags, deaths, suicides, totaldamage, damagereceived, totalshots;
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
@@ -814,6 +814,7 @@ namespace game
     extern void showscores(bool on);
     extern void getbestplayers(vector<fpsent *> &best);
     extern void getbestteams(vector<const char *> &best);
+    extern hashset<teaminfo> teaminfos;
     extern void clearteaminfo();
     extern void setteaminfo(const char *team, int frags);
 
