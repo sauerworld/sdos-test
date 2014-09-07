@@ -444,8 +444,9 @@ namespace game
         }
         else
         {
-            if(d==player1) conoutf(contype, "\f2%s got fragged by %s's mighty \f0%s", dname, aname, guns[d->gunselect].name);
-            else conoutf(contype, "\f2%s fragged %s with your mighty \f0%s", aname, dname, guns[d->gunselect].name);
+            if(d==player1) conoutf(contype, "\f2%s got fragged by %s's mighty \f0%s", dname, aname, guns[actor->gunselect].name);
+            else if (d==player1 && d->state==CS_SPECTATOR) conoutf(contype, "\f2%s fragged %s with his mighty \f0%s", aname, dname, guns[actor->gunselect].name);
+            else conoutf(contype, "\f2%s fragged %s with your mighty \f0%s", aname, dname, guns[actor->gunselect].name);
         }
         deathstate(d);
 		ai::killed(d, actor);
@@ -572,8 +573,8 @@ namespace game
         {
             fpsent *d = players[i];
             d->frags = d->flags = 0;
-            d->deaths = 0;
-            d->totaldamage = 0;
+            d->deaths = d->suicides = 0;
+            d->totaldamage = d->damagereceived = 0;
             d->totalshots = 0;
             d->maxhealth = 100;
             d->lifesequence = -1;

@@ -1525,6 +1525,7 @@ namespace game
                 target->armour = armour;
                 target->health = health;
 
+                if (actor == player1) target->damagereceived += damage;
                 if (actor != player1 && actor != target)
                 {
                     if( (actor!=target) ) { actor->totaldamage += damage; target->damagereceived += damage;}

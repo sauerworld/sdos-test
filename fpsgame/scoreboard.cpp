@@ -273,7 +273,39 @@ namespace game
                 loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, o->frags)); // flat gui
                 g.poplist();
             }
-
+			// show death
+			if(showdeaths)
+			{
+				g.pushlist();
+				g.strut(6);
+				//g.text("deaths", fgcolor);
+				g.text("deaths", COL_GREY); // flat gui
+				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->deaths));
+				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, o->deaths)); // flat gui
+				g.poplist();
+			}
+			// show suicides
+			if(showsuicides)
+			{
+				g.pushlist();
+				g.strut(5);
+				//g.text("sui", fgcolor);
+				g.text("sui", COL_GREY); // flat gui
+				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, o->suicides));
+				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, o->suicides)); // flat gui
+				g.poplist();
+			}
+			// show kpd
+			if(showkpd)
+			{
+				g.pushlist();
+				g.strut(5);
+				//g.text("K/D", fgcolor);
+				g.text("K/D", COL_GREY); // flat gui
+				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL,  o->deaths ? g.textf("%.2f", COL_WHITE, NULL, (float)o->frags/o->deaths) : g.textf("%d.00", COL_WHITE, NULL, o->frags) ));
+				loopscoregroup(o, o->deaths ? g.textf("%.2f", COL_WHITE, NULL, (float)o->frags/o->deaths) : g.textf("%d.00", COL_WHITE, NULL, o->frags) ); // flat gui
+				g.poplist();
+			}
             // show totaldamage per player
 			if(showdamagedealt)
 			{
@@ -283,8 +315,8 @@ namespace game
 				g.text("dd", COL_GREY); // flat gui
 				if (showdamagedealt == 1)
 				{
-					//loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%d.%dk", 0xFFFFDD, NULL,(o->totaldamage)/1000 ,((o->totaldamage)%1000)/100 ) : g.textf("%d", 0xFFFFDD, NULL,  o->totaldamage));
-					loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%d.%dk", COL_WHITE, NULL,(o->totaldamage)/1000 ,((o->totaldamage)%1000)/100 ) : g.textf("%d", COL_WHITE, NULL,  o->totaldamage)); // flat gui
+					//loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%.2fk", 0xFFFFDD, NULL, (float)o->totaldamage/1000 ) : g.textf("%d", 0xFFFFDD, NULL,  o->totaldamage));
+					loopscoregroup(o, o->totaldamage > 1000 ? g.textf("%.2fk", COL_WHITE, NULL,(float)o->totaldamage/1000 ) : g.textf("%d", COL_WHITE, NULL,  o->totaldamage)); // flat gui
 				}
 				else {
 					//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL,  o->totaldamage));
@@ -301,8 +333,8 @@ namespace game
 				g.text("dr", COL_GREY); // flat gui
 				if (showdamagereceived == 1)
 				{
-					//loopscoregroup(o, o->damagereceived > 1000 ? g.textf("%d.%dk", 0xFFFFDD, NULL,(o->damagereceived)/1000 ,((o->damagereceived)%1000)/100 ) : g.textf("%d", 0xFFFFDD, NULL,  o->damagereceived));
-					loopscoregroup(o, o->damagereceived > 1000 ? g.textf("%d.%dk", COL_WHITE, NULL,(o->damagereceived)/1000 ,((o->damagereceived)%1000)/100 ) : g.textf("%d", COL_WHITE, NULL,  o->damagereceived)); // flat gui
+					//loopscoregroup(o, o->damagereceived > 1000 ? g.textf("%.2fk", 0xFFFFDD, NULL, (float)o->damagereceived/1000 ) : g.textf("%d", 0xFFFFDD, NULL,  o->damagereceived));
+					loopscoregroup(o, o->damagereceived > 1000 ? g.textf("%.2fk", COL_WHITE, NULL, (float)o->damagereceived/1000 ) : g.textf("%d", COL_WHITE, NULL,  o->damagereceived)); // flat gui
 				}
 				else {
 					//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL,  o->damagereceived));
@@ -319,40 +351,6 @@ namespace game
 				g.text("acc", COL_GREY); // flat gui
 				//loopscoregroup(o, g.textf("%d%%", 0xFFFFDD, NULL, (o->totaldamage*100)/max(o->totalshots, 1)));
 				loopscoregroup(o, g.textf("%d%%", COL_WHITE, NULL, (o->totaldamage*100)/max(o->totalshots, 1))); // flat gui
-				g.poplist();
-			}
-
-			// show death
-			if(showdeaths)
-			{
-				g.pushlist();
-				g.strut(5);
-				//g.text("death", fgcolor);
-				g.text("death", COL_GREY); // flat gui
-				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, (o->deaths)));
-				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, (o->deaths))); // flat gui
-				g.poplist();
-			}
-			// show death
-			if(showsuicides)
-			{
-				g.pushlist();
-				g.strut(5);
-				//g.text("sui", fgcolor);
-				g.text("sui", COL_GREY); // flat gui
-				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, (o->suicides)));
-				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, (o->suicides))); // flat gui
-				g.poplist();
-			}
-			// show kpd
-			if(showkpd)
-			{
-				g.pushlist();
-				g.strut(5);
-				//g.text("K/D", fgcolor);
-				g.text("K/D", COL_GREY); // flat gui
-				//loopscoregroup(o, g.textf("%d", 0xFFFFDD, NULL, (o->frags)/(o->deaths)));
-				loopscoregroup(o, g.textf("%d", COL_WHITE, NULL, (o->frags)/(o->deaths))); // flat gui
 				g.poplist();
 			}
 
