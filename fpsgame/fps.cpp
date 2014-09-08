@@ -6,7 +6,13 @@ extern int multipoll;
 namespace game
 {
 	XIDENT(IDF_SWLACC, VARP, chatcolors, 0, 0, 1);
-   XIDENT(IDF_SWLACC, VARP, speccolors, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, speccolors, 0, 0, 1);
+
+    fpsent *lasttkvictim = NULL;
+    fpsent *lasttkculprit = NULL;
+
+    ICOMMAND(getlasttkvictim, "", (), result((lasttkvictim == NULL) ? "" : lasttkvictim->name));
+    ICOMMAND(getlasttkculprit, "", (), result((lasttkculprit == NULL) ? "" : lasttkculprit->name));
 
 	bool intermission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
@@ -438,8 +444,16 @@ namespace game
         else if(isteam(d->team, actor->team))
         {
             contype |= CON_TEAMKILL;
-            if(actor==player1) conoutf(contype, "\f6%s fragged a teammate (%s)", aname, dname);
-            else if(d==player1) conoutf(contype, "\f6%s got fragged by a teammate (%s)", dname, aname);
+            if(actor==player1) 
+            {
+                conoutf(contype, "\f6%s fragged a teammate (%s)", aname, dname);
+                lasttkvictim = d;
+            }
+            else if(d==player1) 
+            {
+                conoutf(contype, "\f6%s got fragged by a teammate (%s)", dname, aname);
+                lasttkculprit = actor;
+            }
             else conoutf(contype, "\f2%s fragged a teammate (%s)", aname, dname);
         }
         else
@@ -588,6 +602,9 @@ namespace game
         intermission = false;
         maptime = maprealtime = 0;
         maplimit = -1;
+
+        lasttkvictim = NULL;
+        lasttkculprit = NULL;
 
         if(cmode)
         {
