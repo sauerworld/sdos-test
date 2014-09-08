@@ -995,6 +995,8 @@ namespace game
 
     VARP(teamcrosshair, 0, 1, 1);
     VARP(hitcrosshair, 0, 425, 1000);
+    XIDENT(IDF_SWLACC, HVARP, crosshaircolor, 0, 0xFFFFFF, 0xFFFFFF);
+    XIDENT(IDF_SWLACC, HVARP, crosshaircolorhit, 0, 0xFFFFFF, 0xFFFFFF);
 
     const char *defaultcrosshair(int index)
     {
@@ -1022,15 +1024,40 @@ namespace game
             {
                 crosshair = 1;
                 r = g = 0;
+                if(getvar("crosshaircolors") == 2) {
+                    r = g = 0; b = 1;
+                }
             }
         }
 
-        if(crosshair!=1 && !editmode && !m_insta)
+        switch(getvar("crosshaircolors"))
         {
-            if(d->health<=25) { r = 1.0f; g = b = 0; }
-            else if(d->health<=50) { r = 1.0f; g = 0.5f; b = 0; }
+            case 2:
+                if(crosshair == 0) 
+                {
+                    r = ((crosshaircolor >> 16) & 0xFF) / 255.0;
+                    g = ((crosshaircolor >> 8) & 0xFF) / 255.0;
+                    b = ((crosshaircolor) & 0xFF) / 255.0;
+                } 
+                else if(crosshair == 2) 
+                {
+                    r = ((crosshaircolorhit >> 16) & 0xFF) / 255.0;
+                    g = ((crosshaircolorhit >> 8) & 0xFF) / 255.0;
+                    b = ((crosshaircolorhit) & 0xFF) / 255.0;
+                }
+                break;
+                
+            case 1:
+            default:
+                if(crosshair!=1 && !editmode && !m_insta)
+                {
+                    if(d->health<=25) { r = 1.0f; g = b = 0; }
+                    else if(d->health<=50) { r = 1.0f; g = 0.5f; b = 0; }
+                }
+                if(d->gunwait) { r *= 0.5f; g *= 0.5f; b *= 0.5f; }
+                break;
         }
-        if(d->gunwait) { r *= 0.5f; g *= 0.5f; b *= 0.5f; }
+
         return crosshair;
     }
 
