@@ -310,7 +310,7 @@ namespace game
 			if(showdamagedealt)
 			{
 				g.pushlist();
-				g.strut(5);
+				g.strut(6);
 				//g.text("dd", fgcolor);
 				g.text("dd", COL_GREY); // flat gui
 				if (showdamagedealt == 1)
@@ -328,7 +328,7 @@ namespace game
 			if(showdamagereceived)
 			{
 				g.pushlist();
-				g.strut(5);
+				g.strut(6);
 				//g.text("dr", fgcolor);
 				g.text("dr", COL_GREY); // flat gui
 				if (showdamagereceived == 1)
