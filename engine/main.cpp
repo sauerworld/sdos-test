@@ -609,7 +609,7 @@ void setupscreen(int &useddepthbits, int &usedfsaa)
     scr_w = min(scr_w, desktopw);
     scr_h = min(scr_h, desktoph);
 
-    int winx = SDL_WINDOWPOS_UNDEFINED, winy = SDL_WINDOWPOS_UNDEFINED, winw = scr_w, winh = scr_h, flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+    int winx = SDL_WINDOWPOS_UNDEFINED, winy = SDL_WINDOWPOS_UNDEFINED, winw = scr_w, winh = scr_h, flags = SDL_WINDOW_RESIZABLE/* | SDL_WINDOW_ALLOW_HIGHDPI*/;
     if(fullscreen)
     {
         winw = desktopw;
