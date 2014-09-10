@@ -98,9 +98,7 @@ VAR(colorbits, 0, 0, 32);
 VARF(depthbits, 0, 0, 32, initwarning("depth-buffer precision"));
 VARF(stencilbits, 0, 0, 32, initwarning("stencil-buffer precision"));
 VARF(fsaa, -1, -1, 16, initwarning("anti-aliasing"));
-extern void updatevsync();
-VARF(vsync, 0, 0, 1, updatevsync());
-XIDENT(IDF_SWLACC, VARFP, vsynctear, 0, 0, 1, if(vsync) updatevsync());
+extern int vsync;
 
 void writeinitcfg()
 {
@@ -329,7 +327,7 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 }
 
 float loadprogress = 0;
-static ullong tick();
+ullong tick();
 
 void renderprogress(float bar, const char *text, GLuint tex, bool background)   // also used during loading
 {
@@ -669,21 +667,11 @@ void setupscreen(int &useddepthbits, int &usedfsaa)
 
     glcontext = SDL_GL_CreateContext(screen);
     if(!glcontext) fatal("failed to create OpenGL context: %s", SDL_GetError());
-    updatevsync();
 
     SDL_GetWindowSize(screen, &screenw, &screenh);
 
     useddepthbits = config&1 ? depthbits : 0;
     usedfsaa = config&4 ? fsaa : 0;
-}
-
-void updatevsync(){
-       if(!glcontext) return;
-       holdscreenlock;
-       if(!SDL_GL_SetSwapInterval(vsync ? (vsynctear ? -1 : 1) : 0)) return;
-       if(vsync && vsynctear) conoutf("vsynctear not supported, or you need to restart sauer to apply changes.");
-       else if(vsync) conoutf("vsynctear not supported, or you need to restart sauer to apply changes.");
-       else conoutf("You need to restart sauer to disable vsync.");
 }
 
 void resetgl()
@@ -968,16 +956,12 @@ void swapbuffers(bool overlay)
  
 VAR(menufps, 0, 60, 1000);
 VARP(maxfps, 0, 200, 1000);
-XIDENT(IDF_SWLACC, VARFP, multipoll, -1, 0, 1,
-    drawer::keepgl(multipoll == 1);
-    if(initing == NOT_INITING && multipoll < 0 && (vsync || !maxfps)) conoutf(CON_WARN, "/multipoll -1 makes sense only with /vsync 0 and /maxfps non-zero. Make sure you really understand what /multipoll does.");
-);
 XIDENT(IDF_SWLACC, VAR, nanodelay, 0, 50000, 999999);
 
 #ifdef __APPLE__
 
 #include <mach/mach_time.h>
-static inline ullong tick(){
+ullong tick(){
         static mach_timebase_info_data_t tb;
         if(!tb.denom) mach_timebase_info(&tb);
         return (mach_absolute_time()*ullong(tb.numer))/tb.denom;
@@ -987,48 +971,13 @@ static inline ullong tick(){
 
 #else
 
-static inline ullong tick(){
+ullong tick(){
     timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
     return t.tv_sec * 1000000000ULL + t.tv_nsec;
 }
 
 #endif
-
-bool limitfps(ullong &tick_now)
-{
-    static ullong lastdraw = 0, lastrefresh = 0;
-    int fpslimit = (mainmenu || minimized) && menufps ? (maxfps ? min(maxfps, menufps) : menufps) : maxfps;
-    ullong nextdraw = (fpslimit ? 1000000000ULL / fpslimit : 0) + lastdraw;
-    bool dodraw;
-    timespec t, _;
-    t.tv_sec = 0;
-    if(multipoll){
-        if(fpslimit && nextdraw <= tick_now){
-            dodraw = true;
-            goto frame;
-        }
-        dodraw = fpslimit == 0;
-        ullong nextrefresh = lastrefresh + nanodelay;
-        if(nextrefresh <= tick_now) goto frame;
-        t.tv_nsec = nextrefresh - tick_now;
-        nanosleep(&t, &_);
-        return limitfps(tick_now = tick());
-    }
-    else{
-        if(nextdraw <= tick_now){
-            dodraw = true;
-            goto frame;
-        }
-        t.tv_nsec = nextdraw - tick_now;
-        nanosleep(&t, &_);
-        return limitfps(tick_now = tick());
-    }
-frame:
-    lastrefresh = tick_now;
-    if(dodraw) lastdraw = tick_now;
-    return dodraw;
-}
 
 #if defined(WIN32) && !defined(_DEBUG) && !defined(__GNUC__)
 void stackdumper(unsigned int type, EXCEPTION_POINTERS *ep)
@@ -1073,22 +1022,20 @@ void stackdumper(unsigned int type, EXCEPTION_POINTERS *ep)
 }
 #endif
 
-int currentfps[3] = {0, 0, 0};
+int currentfps[NUMFPS];
 
-void updatefps(int which, int value = 1){
-	static int fpsaccumulator[3] = {0, 0, 0};
-	static int fpsbasemillis = 0, drawmillistot = 0;
-	if(totalmillis - fpsbasemillis >= 1000){
-		loopi(3){
-			currentfps[i] = fpsaccumulator[i];
-			fpsaccumulator[i] = 0;
-		}
-		if(drawmillistot) currentfps[2]/=drawmillistot;
-		drawmillistot = 0;
-		fpsbasemillis = totalmillis;
-	}
-	fpsaccumulator[which]+=value;
-	if(which==2) drawmillistot++;
+void updatefps(int which)
+{
+    static int fpsaccumulator[NUMFPS];
+    static int fpsbasemillis = 0;
+    if(totalmillis - fpsbasemillis >= 1000){
+        int frames = currentfps[FPS] = fpsaccumulator[FPS];
+        drawer::stats(currentfps[MISSFPS], currentfps[RESYNCS], currentfps[VSYNCLAG], currentfps[TOTLAG]);
+        currentfps[VSYNCLAG] /= (frames ? frames : 1), currentfps[TOTLAG] /= (frames ? frames : 1);
+        fpsaccumulator[FPS] = 0;
+        fpsbasemillis = totalmillis;
+    }
+    fpsaccumulator[which]++;
 }
 
 int getfps(int which)
@@ -1098,7 +1045,7 @@ int getfps(int which)
 
 void getfps_(int *raw, int *which)
 {
-    intret(getfps(clamp(*which, 0, 2)));
+    intret(getfps(clamp(*which, 0, NUMFPS - 1)));
 }
 
 COMMANDN(getfps, getfps_, "ii");
@@ -1179,7 +1126,7 @@ int main(int argc, char **argv)
             case 'z': depthbits = atoi(&argv[i][2]); break;
             case 'b': /* compat, ignore */ break;
             case 'a': fsaa = atoi(&argv[i][2]); break;
-            case 'v': vsync = atoi(&argv[i][2]); if(vsync < 0) { vsynctear = 1; vsync = 1; } else vsynctear = 0; break;
+            case 'v': vsync = !!atoi(&argv[i][2]); break;
             case 't': fullscreen = atoi(&argv[i][2]); break;
             case 's': stencilbits = atoi(&argv[i][2]); break;
             case 'f': 
@@ -1338,11 +1285,9 @@ int main(int argc, char **argv)
 
     ullong tick_last = tick();
     double finelastmillis = lastmillis, finetotalmillis = totalmillis;
-    bool drawrequested = false;
     for(;;)
     {
         ullong tick_now = tick();
-        drawrequested |= limitfps(tick_now);
         double elapsedmillis = double(tick_now - tick_last)/1000000;
         tick_last = tick_now;
         totalmillis = (finetotalmillis += elapsedmillis);
@@ -1357,32 +1302,29 @@ int main(int argc, char **argv)
 
         game::updateworld();
 
-        checksleep(lastmillis);
+        if(!lightupdate) checksleep(lastmillis);
 
         serverslice(false, 0);
 
-        if(!lightupdate) updatefps(1);
-
-        if(!drawrequested || drawer::swapping()){
-            if(lightupdate && !nanodelay) sched_yield();
-            continue;
+        if(!lightupdate){
+            // miscellaneous general game effects
+            recomputecamera();
+            updateparticles();
+            updatesounds();
         }
-        drawrequested = false;
-
-        ullong start = tick();
-
-        updatefps(0);
-
-        // miscellaneous general game effects
-        recomputecamera();
-        updateparticles();
-        updatesounds();
 
         if(minimized) continue;
 
-        if(!mainmenu && multipoll > 0) drawer::letdraw();
-        else drawer::draw();
-        updatefps(2, (tick() - start)/1000);
+        if(!drawer::wantdraw()){
+            if(nanodelay){
+                timespec t{ .tv_sec = 0, .tv_nsec = nanodelay };
+                nanosleep(&t, 0);
+            } else sched_yield();
+            continue;
+        }
+
+        updatefps(FPS);
+        drawer::letdraw();
 
     }
     

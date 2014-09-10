@@ -179,6 +179,8 @@ VAR(usetexcompress, 1, 0, 0);
 VAR(rtscissor, 0, 1, 1);
 VAR(blurtile, 0, 1, 1);
 VAR(rtsharefb, 0, 1, 1);
+VAR(vsync, 0, 1, 2);
+extern int maxfps;
 
 static bool checkseries(const char *s, int low, int high)
 {
@@ -2455,8 +2457,19 @@ void gl_drawhud()
             int roffset = 0;
             if(showfps)
             {
-                int decimilli = getfps(2)/100;
-                draw_textf("fps %d draw %d.%dms ifps %d", conw-14*FONTH, conh-FONTH*3/2, getfps(0), decimilli/10, decimilli%10, getfps(1));
+                int totlag = getfps(TOTLAG)/100;
+                if(vsync == 2)
+                {
+                    int vsynclag = getfps(VSYNCLAG)/100;
+                    draw_textf("fps %d lag %d.%d(%d.%d) late %d(%d)", conw-15*FONTH, conh-FONTH*3/2, getfps(FPS), totlag/10, totlag%10, vsynclag/10, vsynclag%10, getfps(RESYNCS), getfps(MISSFPS));
+                }
+                else if(vsync == 1) draw_textf("fps %d lag %d.%d", conw-9*FONTH, conh-FONTH*3/2, getfps(FPS), totlag/10, totlag%10);
+                else
+                {
+                    SDL_DisplayMode current;
+                    SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(screen), &current);
+                    draw_textf("fps %d draw %d.%d (%d Hz)", conw-12*FONTH, conh-FONTH*3/2, getfps(FPS), totlag/10, totlag%10, current.refresh_rate);
+                }
                 roffset += FONTH;
             }
 
@@ -2571,18 +2584,133 @@ void gl_drawhud()
 }
 
 
-static enum djob { DRAWER_NONE, DRAWER_DRAW, DRAWER_ACQUIRE, DRAWER_RELEASE } job = DRAWER_NONE;
-static SDL_mutex *screenmutex = NULL;
-static bool _keepgl;
-static SDL_atomic_t _swapping;
-static SDL_sem *dojob, *donejob;
-static SDL_threadID drawerID;
 
 extern SDL_GLContext glcontext;
-static int drawerfn(void *){
+extern ullong tick();
+
+namespace drawer{
+
+XIDENT(IDF_SWLACC, VARP, jitvanticipate, 100000, 1500000, 15000000);
+
+namespace{
+
+enum drawerjob{ DRAWER_NONE, DRAWER_DRAW, DRAWER_ACQUIRE, DRAWER_RELEASE } job = DRAWER_NONE;
+SDL_mutex *screenmutex = NULL;
+SDL_atomic_t _wantdraw, missedsyncs, resyncs, vsynclag, totlag;
+SDL_sem *dojob, *donejob;
+SDL_threadID drawerID;
+int lockrecursion = 0;
+int lastrefreshrate = -1;
+ullong lastvsync = 0;
+int vsyncpredictframes = 1;
+
+ullong draw(){
+
+    bool sync, starving;
+    ullong start, drawend;
+
+    {
+        holdscreenlock;
+        start = tick();
+
+        //drawing, was in engine/main.cpp
+        inbetweenframes = false;
+        if(mainmenu) gl_drawmainmenu();
+        else gl_drawframe();
+
+        recorder::capture(true);
+        renderedframe = inbetweenframes = true;
+
+        //unblock the logic thread
+        bool vsync = ::vsync || mainmenu;
+        int maxfps = ::maxfps;
+        job = DRAWER_NONE;
+        SDL_SemPost(donejob);
+
+        if(!vsync){
+            SDL_GL_SetSwapInterval(0);
+            SDL_GL_SwapWindow(screen);
+            glFinish();     //clear the pipeline to block as shortly as possible the logic thread for the next frame
+            ullong now = tick();
+            SDL_AtomicAdd(&totlag, (now - start)/1000);
+            if(maxfps){
+                ullong next = start + 1000000000ULL/maxfps;
+                return next > now ? next - now : 0;
+            }
+            return 0;
+        }
+
+        //CPU to GPU syncing logic
+
+        //get current refresh, make sure our calculation is still valid
+        SDL_DisplayMode current;
+        SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(screen), &current);
+        if(current.refresh_rate != lastrefreshrate){
+            lastrefreshrate = current.refresh_rate;
+            lastvsync = 0;
+        }
+        ullong frameinterval = 1000000000ULL / lastrefreshrate;
+
+        //block to measure real time spent drawing
+        glFinish();
+        drawend = tick();
+
+        //check if we are drawing frames too slowly
+        starving = drawend - start > frameinterval - 1000000ULL;
+        if(starving) lastvsync = 0;
+
+        sync = !lastvsync || drawend < lastvsync + vsyncpredictframes++ * frameinterval;
+        SDL_GL_SetSwapInterval(sync);
+        SDL_GL_SwapWindow(screen);
+        SDL_AtomicAdd(&missedsyncs, !sync);
+        glClear(GL_DEPTH_BUFFER_BIT);   //touch the next buffer to make sure we block until we can draw again (buffers effectively swapped)
+        glFinish();
+        if(starving) return 0;
+
+    }
+
+    //update vsync timestamp
+    ullong now = tick();
+    SDL_AtomicAdd(&totlag, (now - start)/1000);
+    SDL_AtomicAdd(&vsynclag, (now - drawend)/1000);
+    if(sync){
+        lastvsync = now;
+        vsyncpredictframes = 1;
+    }
+
+    if(vsync != 2) return 0;
+
+    //check for screw up, or sleep before signaling draw request
+    if(vsyncpredictframes > 3){
+        lastvsync = 0;
+        SDL_AtomicAdd(&resyncs, 1);
+        return 0;
+    }
+
+    //next vsync - allowance (0.5 ms) - draw time
+    ullong wakeup = lastvsync + vsyncpredictframes * (1000000000ULL / lastrefreshrate) - jitvanticipate - (drawend - start);
+    return wakeup > now ? wakeup - now : 0;
+
+}
+
+void dispatch_job(drawerjob j){
+    job = j;
+    SDL_SemPost(dojob);
+    SDL_SemWait(donejob);
+}
+
+int threadfunc(void *){
+    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);    //try to minimize cpu scheduler errors
     while(true){
         SDL_SemWait(dojob);
-        if(job == DRAWER_DRAW) drawer::draw();
+        if(job == DRAWER_DRAW){
+            SDL_AtomicSet(&_wantdraw, 0);
+            if(long wait = draw()){
+                timespec t{ .tv_sec = 0, .tv_nsec = wait };
+                nanosleep(&t, 0);
+            }
+            SDL_AtomicSet(&_wantdraw, 1);
+        }
         else{
             job == DRAWER_ACQUIRE ? SDL_GL_MakeCurrent(screen, glcontext) : SDL_GL_MakeCurrent(NULL, NULL);
             job = DRAWER_NONE;
@@ -2592,80 +2720,49 @@ static int drawerfn(void *){
     return 0;
 }
 
-extern int multipoll;
 void initializedrawer(){
     screenmutex = SDL_CreateMutex();
-    SDL_AtomicSet(&_swapping, 0);
-    _keepgl = multipoll == 1;
+    SDL_AtomicSet(&_wantdraw, 1);
+    SDL_AtomicSet(&missedsyncs, 0);
+    SDL_AtomicSet(&resyncs, 0);
+    SDL_AtomicSet(&vsynclag, 0);
+    SDL_AtomicSet(&totlag, 0);
     dojob = SDL_CreateSemaphore(0);
     donejob = SDL_CreateSemaphore(0);
-    drawerID = SDL_GetThreadID(SDL_CreateThread(drawerfn, "drawer", NULL));
+    drawerID = SDL_GetThreadID(SDL_CreateThread(threadfunc, "drawer", NULL));
 }
 
-static bool isdrawer(){
-    return SDL_GetThreadID(NULL) == drawerID;
 }
 
-bool drawer::swapping(){
-    return SDL_AtomicGet(&_swapping);
+bool wantdraw(){
+    return SDL_AtomicGet(&_wantdraw);
 }
 
-static void dispatch_job(djob j){
-    job = j;
-    SDL_SemPost(dojob);
-    SDL_SemWait(donejob);
-}
-
-void drawer::keepgl(bool on){
-    holdscreenlock;
-    _keepgl = on;
-}
-
-void drawer::letdraw(){
+void letdraw(){
     dispatch_job(DRAWER_DRAW);
 }
 
-void drawer::draw(){
-    {
-        //grab the screen first to prevent the master thread from drawing next frame stuff on it
-        holdscreenlock;
-
-        inbetweenframes = false;
-        if(mainmenu) gl_drawmainmenu();
-        else gl_drawframe();
-
-        recorder::capture(true);
-        renderedframe = inbetweenframes = true;
-
-        if(isdrawer()){
-            SDL_AtomicSet(&_swapping, 1);
-            job = DRAWER_NONE;
-            SDL_SemPost(donejob);
-        }
-        SDL_GL_SwapWindow(screen);
-        //do this to concentrate OpenGL work in the swapper thread
-        if(isdrawer()){
-            glClear(GL_DEPTH_BUFFER_BIT);   //for some reason glFinish returns before the buffer is really available
-            glFinish();
-        }
-        //release the lock first to avoid mutex contention
-    }
-    if(isdrawer()) SDL_AtomicSet(&_swapping, 0);
+void stats(int& _missedsyncs, int& _resyncs, int& _vsynclag, int& _totlag){
+    _missedsyncs = SDL_AtomicSet(&missedsyncs, 0);
+    _resyncs = SDL_AtomicSet(&resyncs, 0);
+    _vsynclag = SDL_AtomicSet(&vsynclag, 0);
+    _totlag = SDL_AtomicSet(&totlag, 0);
 }
 
-static int recursion = 0;
-drawer::drawer(){
+lock::lock(){
     if(!screenmutex) initializedrawer();
     SDL_LockMutex(screenmutex);
-    if(recursion++) return;
-    if(_keepgl && !isdrawer()) dispatch_job(DRAWER_RELEASE);
+    if(lockrecursion++) return;
+    if(SDL_GetThreadID(NULL) != drawerID) dispatch_job(DRAWER_RELEASE);
     SDL_GL_MakeCurrent(screen, glcontext);
 }
 
-drawer::~drawer(){
-    if(!--recursion && _keepgl && !isdrawer()){
+lock::~lock(){
+    if(!--lockrecursion && SDL_GetThreadID(NULL) != drawerID){
         SDL_GL_MakeCurrent(NULL, NULL);
         dispatch_job(DRAWER_ACQUIRE);
     }
     SDL_UnlockMutex(screenmutex);
+}
+
 }
