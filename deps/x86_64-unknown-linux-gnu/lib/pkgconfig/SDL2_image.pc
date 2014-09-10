@@ -1,0 +1,12 @@
+prefix=/home/pisto/sorgenti/sdos-test/src/deps/x86_64-unknown-linux-gnu
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: SDL2_image
+Description: image loading library for Simple DirectMedia Layer
+Version: 2.0.0
+Requires: sdl2 >= 2.0.0
+Libs: -L${libdir} -lSDL2_image
+Cflags: -I${includedir}/SDL2
+

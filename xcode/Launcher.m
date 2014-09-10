@@ -15,6 +15,7 @@
     {
         dataPath = [path retain];
     }
+/*
     else  // development setup
     {
         NSString *type = nil;
@@ -47,6 +48,7 @@
         }
         NSLog(@"type=%@", type);
     }
+*/
     // userpath: directory where user files are kept - typically /Users/<name>/Application Support/sauerbraten
     FSRef folder;
     path = nil;
@@ -115,8 +117,8 @@
     
     // call back into C/C++ world
     if(dataPath) chdir([dataPath fileSystemRepresentation]);
-    setenv("SDL_SINGLEDISPLAY", "1", 1);
-    setenv("SDL_ENABLEAPPEVENTS", "1", 1); // makes Command-H, Command-M and Command-Q work at least when not in fullscreen
+    //setenv("SDL_SINGLEDISPLAY", "1", 1);
+    //setenv("SDL_ENABLEAPPEVENTS", "1", 1); // makes Command-H, Command-M and Command-Q work at least when not in fullscreen
     extern int SDL_main(int, char*[]);
     SDL_main(argc, (char**)argv);    
     // won't reach here as the C/C++ code calls fatal/exit

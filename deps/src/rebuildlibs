@@ -1,0 +1,24 @@
+#!/bin/bash
+
+PREFIX=`[[ -z $1 ]] && ../config.guess || echo $1`
+j=`(nproc || (sysctl hw.ncpu | awk '{print $2}') || echo 1) 2>/dev/null`
+rm -rf ../$PREFIX
+mkdir ../$PREFIX
+read -p "git -clean -dfx? " -n 1 -r
+echo
+[[ $REPLY =~ ^[Yy]$ ]] && git clean -dfx .
+
+function compile {
+	(make -f configure.mk $1 PREFIX=$PREFIX && cd $1 && make -j $j install) || exit 1
+}
+
+compile libenet
+compile libz
+compile libpng
+compile libjpeg
+compile libogg
+compile libvorbis
+compile libSDL
+compile libSDL_image
+compile libSDL_mixer
+

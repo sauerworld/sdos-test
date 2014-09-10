@@ -1,0 +1,4 @@
+/sauer_client
+*/*.o
+*/*.res
+*.exe
