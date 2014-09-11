@@ -18,12 +18,11 @@ else
 	exit
 fi
 
-pushd src
 make clean
 
 if [[ "$arch" == "win" ]]
 then 
-	cp -r ../pak comed
+	cp -r pak comed
 	mkdir comed/bin
 	mkdir comed/bin64
 	cp INSTALL.txt comed/install.txt
@@ -33,13 +32,12 @@ then
 	make PREFIX=x86_64-w64-mingw32
 	mv sauerbraten.exe comed/bin64/sauerbraten.exe
 	zip -r comed-nightly-windows.zip comed
-	mv comed-nightly-windows.zip ../
 	rm -r comed
 fi
 
 if [[ "$arch" == "lin" ]]
 then 
-	cp -r ../pak comed
+	cp -r pak comed
 	mkdir comed/bin_unix
 	cp INSTALL.lin comed/install.txt
 	echo ""
@@ -52,20 +50,21 @@ then
 	make PREFIX=x86_64-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_64_client
 	tar czf comed-nightly-linux.tar.gz comed
-	mv comed-nightly-linux.tar.gz ../
 	rm -r comed
 fi
 
 if [[ "$arch" == "mac" ]]
 then 
+	echo ""
 	echo "note, this fails on darwin kernels > 13.2.0, e.g. osX 10.9"
-	cp -r ../pak/ comed
+	echo "quickfix should be to rename the deps/*darwin* dir to the propper version number"
+	echo ""
+	cp -r pak comed
 	cp INSTALL.osx comed/install.txt
 	make clean
 	make PREFIX=x86_64-apple-darwin13.2.0
 	mv sauerbraten comed/
 	tar czf comed-nightly-osx.tar.gz comed
-	mv comed-nightly-osx.tar.gz ../ 
 	rm comed
 fi
 popd
