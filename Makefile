@@ -176,7 +176,7 @@ engine/world.o:		engine/engine.h
 engine/worldio.o:	engine/engine.h
 fpsgame/ai.o:		fpsgame/game.h
 fpsgame/client.o:	fpsgame/game.h fpsgame/capture.h fpsgame/ctf.h fpsgame/collect.h fpsgame/cdemo.h
-fpsgmae/cdemo.o:	fpsgame/game.h
+fpsgame/cdemo.o:	fpsgame/game.h
 fpsgame/entities.o:	fpsgame/game.h
 fpsgame/fps.o:		fpsgame/game.h
 fpsgame/game.h:		shared/cube.h fpsgame/ai.h
