@@ -15,8 +15,8 @@ LINUX:= 1
 ARCHFLAGS+= -pthread
 
 else ifneq (, $(findstring darwin,$(PREFIX)))
-CXX:= clang++
-CC:= clang
+CXX:= $(shell which $(PREFIX)-clang++ 2>/dev/null || echo clang++)
+CC:= $(shell which $(PREFIX)-clang 2>/dev/null || echo clang)
 ARCHFLAGS+= -mmacosx-version-min=10.5
 MAC:= 1
 
