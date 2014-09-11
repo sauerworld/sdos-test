@@ -21,7 +21,7 @@ fi
 if [[ -n "$2" ]]
 then
 	if [[ "$2" != "noclean" ]]
-		make clean
+	then make clean
 	fi
 fi
 
