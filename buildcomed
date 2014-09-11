@@ -49,7 +49,7 @@ then
 	#make clean
 	make PREFIX=x86_64-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_64_client
-	tar czf comed-nightly-linux.tar.gz comed
+	zip -r comed-nightly-linux.zip comed
 	rm -r comed
 fi
 
@@ -64,7 +64,7 @@ then
 	make clean
 	make PREFIX=x86_64-apple-darwin13.2.0
 	mv sauerbraten comed/
-	tar czf comed-nightly-osx.tar.gz comed
+	zip -r comed-nightly-osx.tar.gz comed
 	rm comed
 fi
 popd
