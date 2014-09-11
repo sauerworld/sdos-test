@@ -18,11 +18,8 @@ else
 	exit
 fi
 
-if [[ -n "$2" ]]
-then
-	if [[ "$2" != "noclean" ]]
-	then make clean
-	fi
+if [[ "$2" != "noclean" ]]
+then make clean
 fi
 
 if [[ "$arch" == "win" ]]
@@ -72,7 +69,6 @@ then
 	zip -r comed-nightly-osx.zip comed
 	rm comed
 fi
-popd
 echo ""
 echo "Archive created, hopefully. :)"
 echo "Have fun with the Sauerbraten Community Edition!"
