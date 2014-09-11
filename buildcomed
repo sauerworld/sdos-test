@@ -18,7 +18,12 @@ else
 	exit
 fi
 
-make clean
+if [[ -n "$2" ]]
+then
+	if [[ "$2" != "noclean" ]]
+		make clean
+	fi
+fi
 
 if [[ "$arch" == "win" ]]
 then 
@@ -64,7 +69,7 @@ then
 	make clean
 	make PREFIX=x86_64-apple-darwin13.2.0
 	mv sauerbraten comed/
-	zip -r comed-nightly-osx.tar.gz comed
+	zip -r comed-nightly-osx.zip comed
 	rm comed
 fi
 popd
