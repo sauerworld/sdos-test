@@ -24,7 +24,7 @@ else
 $(error Unknown architecture $(PREFIX))
 endif
 
-STRIP:= $(shell which $(PLATFORM)-$(STRIP) 2>/dev/null || echo strip)
+STRIP:= $(shell which $(PREFIX)-strip 2>/dev/null || echo strip)
 
 ifneq (, $(findstring x86_64,$(PREFIX)))
 ARCHFLAGS+= -m64 
