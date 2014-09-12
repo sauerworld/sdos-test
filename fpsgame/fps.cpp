@@ -114,6 +114,8 @@ namespace game
             lasthit = 0;
             if(cmode) cmode->respawned(player1);
         }
+
+        if(identexists("onspawn")) execute("onspawn");
     }
 
     fpsent *pointatplayer()
@@ -462,6 +464,9 @@ namespace game
             else if (actor==player1) conoutf(contype, "\f2%s fragged %s with your mighty \f0%s", aname, dname, guns[actor->gunselect].name);
             else conoutf(contype, "\f2%s fragged %s with his mighty \f0%s", aname, dname, guns[actor->gunselect].name);
         }
+
+        if(d == player1 && identexists("ondeath")) execute("ondeath");
+
         deathstate(d);
 		ai::killed(d, actor);
     }
