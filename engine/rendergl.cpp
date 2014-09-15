@@ -2468,7 +2468,7 @@ void gl_drawhud()
                 {
                     SDL_DisplayMode current;
                     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(screen), &current);
-                    draw_textf("fps %d draw %d.%d (%d Hz)", conw-12*FONTH, conh-FONTH*3/2, getfps(FPS), totlag/10, totlag%10, current.refresh_rate);
+                    draw_textf("fps %d (%d Hz)", conw-12*FONTH, conh-FONTH*3/2, getfps(FPS), current.refresh_rate);
                 }
                 roffset += FONTH;
             }
@@ -2630,10 +2630,8 @@ ullong draw(){
         if(!vsync){
             SDL_GL_SetSwapInterval(0);
             SDL_GL_SwapWindow(screen);
-            glFinish();     //clear the pipeline to block as shortly as possible the logic thread for the next frame
-            ullong now = tick();
-            SDL_AtomicAdd(&totlag, (now - start)/1000);
             if(maxfps){
+                ullong now = tick();
                 ullong next = start + 1000000000ULL/maxfps;
                 return next > now ? next - now : 0;
             }
