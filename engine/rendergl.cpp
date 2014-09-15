@@ -2469,7 +2469,7 @@ void gl_drawhud()
                 {
                     SDL_DisplayMode current;
                     SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(screen), &current);
-                    draw_textf("fps %d (%d Hz)", conw-12*FONTH, conh-FONTH*3/2, getfps(FPS), current.refresh_rate);
+                    draw_textf("fps %d (%d Hz)", conw-9*FONTH, conh-FONTH*3/2, getfps(FPS), current.refresh_rate);
                 }
                 roffset += FONTH;
             }
