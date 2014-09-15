@@ -2710,8 +2710,9 @@ void dispatch_job(drawerjob j){
 
 int threadfunc(void *){
     SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);    //try to minimize cpu scheduler errors
+    bool havecontext = false;
     while(true){
-        if(vsync || mainmenu || minimized) SDL_SemWait(dojob);
+        if(vsync || mainmenu || minimized || !havecontext) SDL_SemWait(dojob);
         else while(SDL_SemTryWait(dojob)) sched_yield();
         if(job == DRAWER_DRAW){
             SDL_AtomicSet(&_wantdraw, 0);
@@ -2723,6 +2724,7 @@ int threadfunc(void *){
         }
         else{
             job == DRAWER_ACQUIRE ? SDL_GL_MakeCurrent(screen, glcontext) : SDL_GL_MakeCurrent(NULL, NULL);
+            havecontext = job == DRAWER_ACQUIRE;
             job = DRAWER_NONE;
             SDL_SemPost(donejob);
         }
