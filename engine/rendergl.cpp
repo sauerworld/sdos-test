@@ -2599,7 +2599,6 @@ SDL_mutex *screenmutex = NULL;
 SDL_atomic_t _wantdraw, missedsyncs, resyncs, vsynclag, totlag;
 SDL_sem *dojob, *donejob;
 SDL_threadID drawerID;
-int lockrecursion = 0;
 int lastrefreshrate = -1;
 ullong lastvsync = 0;
 int vsyncpredictframes = 1;
@@ -2752,13 +2751,12 @@ void stats(int& _missedsyncs, int& _resyncs, int& _vsynclag, int& _totlag){
 lock::lock(){
     if(!screenmutex) initializedrawer();
     SDL_LockMutex(screenmutex);
-    if(lockrecursion++) return;
     if(SDL_GetThreadID(NULL) != drawerID) dispatch_job(DRAWER_RELEASE);
     SDL_GL_MakeCurrent(screen, glcontext);
 }
 
 lock::~lock(){
-    if(!--lockrecursion && SDL_GetThreadID(NULL) != drawerID){
+    if(SDL_GetThreadID(NULL) != drawerID){
         SDL_GL_MakeCurrent(NULL, NULL);
         dispatch_job(DRAWER_ACQUIRE);
     }
