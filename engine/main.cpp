@@ -341,7 +341,7 @@ void renderprogress(float bar, const char *text, GLuint tex, bool background)   
 
     static ullong lastprogress = 0;
     ullong now = tick();
-    if(now - lastprogress <= 1000000000/59) return;
+    if(now - lastprogress <= 1000000000/20) return;
     lastprogress = now;
 
     extern int sdl_backingstore_bug;
