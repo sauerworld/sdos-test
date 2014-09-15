@@ -180,7 +180,7 @@ VAR(rtscissor, 0, 1, 1);
 VAR(blurtile, 0, 1, 1);
 VAR(rtsharefb, 0, 1, 1);
 VAR(vsync, 0, 1, 2);
-extern int maxfps;
+extern int maxfps, menufps;
 
 static bool checkseries(const char *s, int low, int high)
 {
@@ -2627,6 +2627,16 @@ ullong draw(){
         job = DRAWER_NONE;
         SDL_SemPost(donejob);
 
+        if(mainmenu){
+            SDL_GL_SetSwapInterval(1);
+            SDL_GL_SwapWindow(screen);
+            if(menufps){
+                ullong now = tick();
+                ullong next = start + 1000000000ULL/menufps;
+                return next > now ? next - now : 0;
+            }
+            return 0;
+        }
         if(!vsync){
             SDL_GL_SetSwapInterval(0);
             SDL_GL_SwapWindow(screen);

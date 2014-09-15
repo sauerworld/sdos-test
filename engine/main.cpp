@@ -1313,10 +1313,14 @@ int main(int argc, char **argv)
             updatesounds();
         }
 
-        if(minimized) continue;
+        if(minimized){
+            SDL_Delay(1);
+            continue;
+        }
 
         if(!drawer::wantdraw()){
-            if(nanodelay){
+            if(mainmenu) SDL_Delay(1);
+            else if(nanodelay){
                 timespec t{ .tv_sec = 0, .tv_nsec = nanodelay };
                 nanosleep(&t, 0);
             } else sched_yield();
