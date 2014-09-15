@@ -2653,15 +2653,17 @@ void drawer::draw(){
     if(isdrawer()) SDL_AtomicSet(&_swapping, 0);
 }
 
+static int recursion = 0;
 drawer::drawer(){
     if(!screenmutex) initializedrawer();
     SDL_LockMutex(screenmutex);
+    if(recursion++) return;
     if(_keepgl && !isdrawer()) dispatch_job(DRAWER_RELEASE);
     SDL_GL_MakeCurrent(screen, glcontext);
 }
 
 drawer::~drawer(){
-    if(_keepgl && !isdrawer()){
+    if(!--recursion && _keepgl && !isdrawer()){
         SDL_GL_MakeCurrent(NULL, NULL);
         dispatch_job(DRAWER_ACQUIRE);
     }
