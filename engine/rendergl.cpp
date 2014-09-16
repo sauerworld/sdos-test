@@ -2605,14 +2605,14 @@ int lastrefreshrate = -1;
 ullong lastvsync = 0;
 int vsyncpredictframes = 1;
 
-ullong draw(){
+ullong draw(bool mainthread = false){
 
     bool sync, starving;
     ullong start, drawend;
 
     {
         holdscreenlock;
-        start = tick();
+        if(!mainthread) start = tick();
 
         //drawing, was in engine/main.cpp
         inbetweenframes = false;
@@ -2622,25 +2622,19 @@ ullong draw(){
         recorder::capture(true);
         renderedframe = inbetweenframes = true;
 
+        if(mainthread){
+            SDL_GL_SetSwapInterval(0);
+            SDL_GL_SwapWindow(screen);
+            return 0;
+        }
+
         //unblock the logic thread
-        bool vsync = ::vsync || mainmenu;
-        int maxfps = ::maxfps;
         job = DRAWER_NONE;
         SDL_SemPost(donejob);
 
         if(mainmenu){
             SDL_GL_SetSwapInterval(1);
             SDL_GL_SwapWindow(screen);
-            return 0;
-        }
-        if(!vsync){
-            SDL_GL_SetSwapInterval(0);
-            SDL_GL_SwapWindow(screen);
-            if(maxfps){
-                ullong now = tick();
-                ullong next = start + 1000000000ULL/maxfps;
-                return next > now ? next - now : 0;
-            }
             return 0;
         }
 
@@ -2704,7 +2698,6 @@ void dispatch_job(drawerjob j){
 }
 
 int threadfunc(void *){
-    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);    //try to minimize cpu scheduler errors
     bool havecontext = false;
     while(true){
         if(vsync || mainmenu || minimized || !havecontext) SDL_SemWait(dojob);
@@ -2741,12 +2734,45 @@ void initializedrawer(){
 
 }
 
-bool wantdraw(){
-    return SDL_AtomicGet(&_wantdraw);
-}
+XIDENT(IDF_SWLACC, VAR, nanodelay, 0, 50000, 999999);
+bool checkdraw(){
+    static drawer::lock* mainthreadlock = 0;
+    static ullong lastmaindraw = 0;
+    bool dodraw;
+    if(vsync || mainmenu){
+        DELETEP(mainthreadlock);
+        dodraw = SDL_AtomicGet(&_wantdraw);
+    }
+    else{
+        if(!mainthreadlock) mainthreadlock = new drawer::lock();
+        if(maxfps){
+            ullong period = 1000000000/maxfps;
+            ullong drawstart = tick();
+            if(drawstart > lastmaindraw + 2 * period){    //late
+                dodraw = true;
+                lastmaindraw = drawstart;
+            }
+            else if(drawstart < lastmaindraw + period) dodraw = false;     //early
+            else{      //in time, fake draw start so remainder is accounted for
+                lastmaindraw += period;
+                dodraw = true;
+            }
+        } else dodraw = true;
+    }
 
-void letdraw(){
-    dispatch_job(DRAWER_DRAW);
+    if(!dodraw){    //throttle main thread
+        if(mainmenu) SDL_Delay(1);
+        else if(nanodelay){
+            timespec t{ .tv_sec = 0, .tv_nsec = nanodelay };
+            nanosleep(&t, 0);
+        } else sched_yield();
+        return false;
+    }
+
+    if(!mainthreadlock) dispatch_job(DRAWER_DRAW);
+    else draw(true);
+    return true;
+
 }
 
 void stats(int& _missedsyncs, int& _resyncs, int& _vsynclag, int& _totlag){

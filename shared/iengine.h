@@ -294,8 +294,7 @@ extern vec minimapcenter, minimapradius, minimapscale;
 extern void bindminimap();
 
 namespace drawer{
-bool wantdraw();
-void letdraw();
+bool checkdraw();
 void stats(int& missedsyncs, int& resyncs, int& vsynclag, int& totlag);
 
 struct lock

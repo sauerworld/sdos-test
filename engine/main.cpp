@@ -2,7 +2,6 @@
 
 #include "engine.h"
 #include "sdosscripts.h"
-#include <sched.h>
 
 extern void cleargamma();
 
@@ -955,7 +954,6 @@ void swapbuffers(bool overlay)
  
 VAR(menufps, 0, 60, 1000);
 VARP(maxfps, 0, 200, 1000);
-XIDENT(IDF_SWLACC, VAR, nanodelay, 0, 50000, 999999);
 
 #ifdef __APPLE__
 
@@ -1317,17 +1315,7 @@ int main(int argc, char **argv)
             continue;
         }
 
-        if(!drawer::wantdraw()){
-            if(mainmenu) SDL_Delay(1);
-            else if(nanodelay){
-                timespec t{ .tv_sec = 0, .tv_nsec = nanodelay };
-                nanosleep(&t, 0);
-            } else sched_yield();
-            continue;
-        }
-
-        updatefps(FPS);
-        drawer::letdraw();
+        if(drawer::checkdraw()) updatefps(FPS);
 
     }
     
