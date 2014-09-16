@@ -327,7 +327,6 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 }
 
 float loadprogress = 0;
-ullong tick();
 
 void renderprogress(float bar, const char *text, GLuint tex, bool background)   // also used during loading
 {
@@ -339,9 +338,9 @@ void renderprogress(float bar, const char *text, GLuint tex, bool background)   
     interceptkey(SDLK_UNKNOWN); // keep the event queue awake to avoid 'beachball' cursor
     #endif
 
-    static ullong lastprogress = 0;
-    ullong now = tick();
-    if(now - lastprogress <= 1000000000/20) return;
+    static Uint32 lastprogress = 0;
+    Uint32 now = SDL_GetTicks();
+    if(now - lastprogress <= 1000/20) return;
     lastprogress = now;
 
     extern int sdl_backingstore_bug;
