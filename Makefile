@@ -86,7 +86,7 @@ endif
 endif
 
 ifdef MAC
-override LIBS+= -lenet -lSDL2 -lSDL2_image -ljpeg -lpng -lz -lSDL2_mixer -logg -lvorbis -lvorbisfile -liconv -framework IOKit -framework Cocoa -framework Carbon -framework CoreAudio -framework OpenGL -framework AudioUnit -lm -ldl
+override LIBS+= -lenet -lSDL2 -lSDL2_image -ljpeg -lpng -lz -lSDL2_mixer -logg -lvorbis -lvorbisfile -liconv -framework IOKit -framework Cocoa -framework CoreVideo -framework Carbon -framework CoreAudio -framework OpenGL -framework AudioUnit -lm -ldl
 endif
 
 
