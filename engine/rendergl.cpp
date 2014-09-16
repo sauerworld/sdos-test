@@ -2591,7 +2591,7 @@ extern ullong tick();
 
 namespace drawer{
 
-XIDENT(IDF_SWLACC, VARP, jitvanticipate, 100000, 1500000, 15000000);
+XIDENT(IDF_SWLACC, VARP, jitvanticipate, 100000, 2000000, 15000000);
 
 namespace{
 
