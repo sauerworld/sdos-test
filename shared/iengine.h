@@ -293,16 +293,18 @@ extern void damagecompass(int n, const vec &loc);
 extern vec minimapcenter, minimapradius, minimapscale;
 extern void bindminimap();
 
-struct drawer
+namespace drawer{
+bool checkdraw();
+void stats(int& missedsyncs, int& resyncs, int& vsynclag, int& totlag);
+
+struct lock
 {
-    drawer();
-    ~drawer();
-    static void draw();
-    static void letdraw();
-    static bool swapping();
-    static void keepgl(bool on);
+    lock();
+    ~lock();
 };
-#define holdscreenlock drawer __screenlock
+
+}
+#define holdscreenlock drawer::lock __screenlock
 
 // renderparticles
 enum

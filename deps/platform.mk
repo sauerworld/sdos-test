@@ -15,8 +15,8 @@ LINUX:= 1
 ARCHFLAGS+= -pthread
 
 else ifneq (, $(findstring darwin,$(PREFIX)))
-CXX:= clang++
-CC:= clang
+CXX:= $(shell which $(PREFIX)-clang++ 2>/dev/null || echo clang++)
+CC:= $(shell which $(PREFIX)-clang 2>/dev/null || echo clang)
 ARCHFLAGS+= -mmacosx-version-min=10.5
 MAC:= 1
 
@@ -24,7 +24,7 @@ else
 $(error Unknown architecture $(PREFIX))
 endif
 
-STRIP:= $(shell which $(PLATFORM)-$(STRIP) 2>/dev/null || echo strip)
+STRIP:= $(shell which $(PREFIX)-strip 2>/dev/null || echo strip)
 
 ifneq (, $(findstring x86_64,$(PREFIX)))
 ARCHFLAGS+= -m64 
