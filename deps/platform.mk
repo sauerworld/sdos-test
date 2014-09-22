@@ -45,5 +45,6 @@ override CXXFLAGS+= $(ARCHFLAGS) $(OPTFLAGS) -fvisibility-inlines-hidden
 export CXXFLAGS
 export PKG_CONFIG_LIBDIR:= $(DEPSDIR)/$(PREFIX)/lib/pkgconfig
 override PATH:= $(DEPSDIR)/$(PREFIX)/bin:$(PATH)
+export PKG_CONFIG_PATH:= $(PKG_CONFIG_LIBDIR)
 export PATH
 
