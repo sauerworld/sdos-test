@@ -125,7 +125,7 @@ client:	$(CLIENT_OBJS)
 	$(STRIP) sauer_client
 ifneq ($(STRIP),true)
 ifneq (, $(findstring x86_64,$(PREFIX)))
-	./remove_symbol_version memcpy@GLIBC_2.2.5
+	./quirks/remove_symbol_version memcpy@GLIBC_2.2.5
 endif
 endif
 	-$(UPX) sauer_client
