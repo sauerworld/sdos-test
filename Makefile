@@ -1,7 +1,7 @@
 include deps/platform.mk
 
-override CFLAGS+= -Ideps/$(PREFIX)/include/SDL2 -Ishared -Iengine -Ifpsgame -Wall -fsigned-char
-override CXXFLAGS+= -Ideps/$(PREFIX)/include/SDL2 -Ishared -Iengine -Ifpsgame -std=gnu++0x -Wall -fsigned-char -fno-exceptions -fno-rtti
+override CFLAGS+= -Ideps/$(DEPSNAME)/include/SDL2 -Ishared -Iengine -Ifpsgame -Wall -fsigned-char
+override CXXFLAGS+= -Ideps/$(DEPSNAME)/include/SDL2 -Ishared -Iengine -Ifpsgame -std=gnu++0x -Wall -fsigned-char -fno-exceptions -fno-rtti
 ifneq (,$(findstring -ggdb,$(CXXFLAGS)))
   STRIP=true
   UPX=true
@@ -72,7 +72,7 @@ MACOBJCXX:= xcode/macutils.o
 
 ifdef WINDOWS
 override LDFLAGS+= -mwindows
-override LIBS+= -lenet -lSDL2 -lSDL2_image -ljpeg -lpng -lz -lSDL2_mixer -logg -lvorbis -lvorbisfile -lws2_32 -lwinmm -lopengl32 -ldxguid -lgdi32 -lole32 -limm32 -lversion -loleaut32 -static-libgcc -static-libstdc++ -Wl,-Bstatic -lpthread
+override LIBS+= -lenet -lSDL2 -lSDL2_image -ljpeg -lpng -lz -lSDL2_mixer -logg -lvorbis -lvorbisfile -lws2_32 -lwinmm -lopengl32 -ldxguid -lgdi32 -lole32 -limm32 -lversion -loleaut32 -liconv -static-libgcc -static-libstdc++ -Wl,-Bstatic -lpthread
 endif
 
 ifdef LINUX
