@@ -55,13 +55,9 @@ fi
 
 if [[ "$arch" == "mac" ]]
 then 
-	echo ""
-	echo "note, this fails on darwin kernels > 13.2.0, e.g. osX 10.9"
-	echo "quickfix should be to rename the deps/*darwin* dir to the propper version number"
-	echo ""
 	cp -r pak comed
 	cp INSTALL.osx comed/install.txt
-	make PREFIX=x86_64-apple-darwin13.2.0
+	make PREFIX=x86_64-apple-darwin13
 	mv sauerbraten comed/
 	zip -r comed-nightly-osx.zip comed
 	rm comed
