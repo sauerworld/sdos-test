@@ -1,6 +1,22 @@
 DEPSDIR:= $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 PREFIX:= $(shell $(DEPSDIR)/config.guess)
-ARCHFLAGS:= -I$(DEPSDIR)/$(PREFIX)/include
+ifeq (,$(DEPSNAME))
+BITS:= $(subst x86_64,64,$(findstring x86_64,$(PREFIX)))
+ifeq (,$(BITS))
+BITS:=32
+endif
+ifneq (,$(findstring linux,$(PREFIX)))
+OS:=linux
+else ifneq (,$(findstring mingw,$(PREFIX)))
+OS:=mingw
+else ifneq (,$(findstring apple,$(PREFIX)))
+OS:=apple
+else
+$(error Unknown architecture $(PREFIX))
+endif
+DEPSNAME:=$(OS)$(BITS)
+endif
+ARCHFLAGS:= -I$(DEPSDIR)/$(DEPSNAME)/include
 OPTFLAGS:= -ffast-math -O3 -fomit-frame-pointer -fvisibility=hidden
 
 ifneq (, $(findstring mingw,$(PREFIX)))
@@ -39,12 +55,12 @@ override CPPFLAGS+= $(ARCHFLAGS) $(OPTFLAGS)
 export CPPFLAGS
 override CFLAGS+= $(ARCHFLAGS) $(OPTFLAGS)
 export CFLAGS
-override LDFLAGS+= $(ARCHFLAGS) $(OPTFLAGS) -L$(DEPSDIR)/$(PREFIX)/lib
+override LDFLAGS+= $(ARCHFLAGS) $(OPTFLAGS) -L$(DEPSDIR)/$(DEPSNAME)/lib
 export LDFLAGS
 override CXXFLAGS+= $(ARCHFLAGS) $(OPTFLAGS) -fvisibility-inlines-hidden
 export CXXFLAGS
-export PKG_CONFIG_LIBDIR:= $(DEPSDIR)/$(PREFIX)/lib/pkgconfig
-override PATH:= $(DEPSDIR)/$(PREFIX)/bin:$(PATH)
+export PKG_CONFIG_LIBDIR:= $(DEPSDIR)/$(DEPSNAME)/lib/pkgconfig
 export PKG_CONFIG_PATH:= $(PKG_CONFIG_LIBDIR)
+override PATH:= $(DEPSDIR)/$(DEPSNAME)/bin:$(PATH)
 export PATH
 

@@ -1,8 +1,8 @@
 include ../platform.mk
 
-ROOT= $(realpath ../$(PREFIX))
+ROOT= $(realpath ../$(DEPSNAME))
 ifeq ($(strip $(ROOT)),)
-$(error Missing directory for platform $(PREFIX) $(ROOT))
+$(error Missing directory for platform $(PREFIX))
 endif
 
 default:
