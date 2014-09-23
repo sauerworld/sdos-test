@@ -1319,7 +1319,7 @@ bool g3d_movecursor(int dx, int dy)
 {
     if(!guis2d.length() || !hascursor) return false;
     const float CURSORSCALE = 500.0f;
-    cursorx = max(0.0f, min(1.0f, cursorx+guisens*sdl2_sensitivity_adjust*dx*(screenh/(screenw*CURSORSCALE))));
+    cursorx = max(0.0f, min(1.0f, cursorx+guisens*sdl2_sensitivity_adjust*dx*(winh/(winw*CURSORSCALE))));
     cursory = max(0.0f, min(1.0f, cursory+guisens*sdl2_sensitivity_adjust*dy/CURSORSCALE));
     return true;
 }

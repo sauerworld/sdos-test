@@ -126,7 +126,7 @@ extern const uchar faceedgesidx[6][4];
 extern bool inbetweenframes, renderedframe;
 
 extern SDL_Window *screen;
-extern int screenw, screenh;
+extern int screenw, screenh, winw, winh;
 extern int zpass, glowpass;
 
 extern vector<int> entgroup;
