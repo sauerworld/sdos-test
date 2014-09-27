@@ -2342,7 +2342,15 @@ namespace server
         ci->timesync = false;
     }
 
-    VAR(demo_jumps, -600, 0, 600);
+    ICOMMAND(demo_jumps, "i", (int *seconds), { \
+    	if(m_demo && *seconds > 0) \
+    	{ \
+    		emulatecurtime; \
+    		gamemillis += *seconds * 1000; \
+    		readdemo(curtime + (*seconds * 1000)); \
+    		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0); \
+    	} \
+    });
 
     void serverupdate()
     {
@@ -2351,17 +2359,7 @@ namespace server
         {
             gamemillis += curtime;
 
-            if(m_demo)
-            {
-            	if ( demo_jumps )
-            	{
-            		gamemillis+=(demo_jumps*1000);
-            		readdemo(curtime + (demo_jumps*1000));
-            		demo_jumps = 0;
-            		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0);
-            	}
-            	else readdemo(curtime);
-            }
+            if(m_demo) readdemo(curtime);
             else if(!m_timed || gamemillis < gamelimit)
             {
                 processevents(curtime);
