@@ -460,9 +460,8 @@ namespace game
         }
         else
         {
-            if(d==player1) conoutf(contype, "\f2%s got fragged by %s's mighty \f0%s", dname, aname, guns[actor->gunselect].name);
-            else if (actor==player1) conoutf(contype, "\f2%s fragged %s with your mighty \f0%s", aname, dname, guns[actor->gunselect].name);
-            else conoutf(contype, "\f2%s fragged %s with his mighty \f0%s", aname, dname, guns[actor->gunselect].name);
+            if(d==player1) conoutf(contype, "\f2%s got fragged by %s", dname, aname);
+            else conoutf(contype, "\f2%s fragged %s", aname, dname);
         }
 
         if(d == player1 && identexists("ondeath")) execute("ondeath");
