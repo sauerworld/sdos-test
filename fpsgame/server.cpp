@@ -2342,14 +2342,14 @@ namespace server
         ci->timesync = false;
     }
 
-    ICOMMAND(demo_jumps, "i", (int *seconds), { \
-    	if(m_demo && *seconds > 0) \
-    	{ \
-    		emulatecurtime; \
-    		gamemillis += *seconds * 1000; \
-    		readdemo(curtime + (*seconds * 1000)); \
-    		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0); \
-    	} \
+    ICOMMAND(demo_jumps, "i", (int *seconds), { 
+    	if(m_demo && *seconds > 0)
+    	{
+    		emulatecurtime;
+    		gamemillis += *seconds * 1000;
+    		readdemo(curtime + (*seconds * 1000));
+    		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0);
+    	}
     });
 
     void serverupdate()
