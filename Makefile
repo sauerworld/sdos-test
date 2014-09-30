@@ -72,7 +72,7 @@ MACOBJCXX:= xcode/macutils.o
 
 ifdef WINDOWS
 override LDFLAGS+= -mwindows
-override LIBS+= -lenet -lSDL2 -lSDL2_image -ljpeg -lpng -lz -lSDL2_mixer -logg -lvorbis -lvorbisfile -lws2_32 -lwinmm -lopengl32 -ldxguid -lgdi32 -lole32 -limm32 -lversion -loleaut32 -liconv -static-libgcc -static-libstdc++ -Wl,-Bstatic -lpthread
+override LIBS+= -lenet -lSDL2 -lSDL2_image -ljpeg -lpng -lz -lSDL2_mixer -logg -lvorbis -lvorbisfile -lws2_32 -lwinmm -lopengl32 -ldxguid -lgdi32 -lole32 -limm32 -lversion -loleaut32 -Wl,-Bstatic -liconv -static-libgcc -static-libstdc++ -Wl,-Bstatic -lpthread
 endif
 
 ifdef LINUX

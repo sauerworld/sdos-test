@@ -43,6 +43,7 @@
 #endif
 
 #ifndef STANDALONE
+#define GL_GLEXT_PROTOTYPES
 #include <SDL.h>
 #include <SDL_opengl.h>
 #endif
