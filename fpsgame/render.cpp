@@ -190,6 +190,7 @@ namespace game
     VARP(teamskins, 0, 0, 1);
     XIDENT(IDF_SWLACC, FVARP, playernamesize, 2.0f, 2.0f, 10.0f);
     XIDENT(IDF_SWLACC, VARP, playernamezoffset, 0, 0, 10);
+    XIDENT(IDF_SWLACC, VARP, specautoteams, 0, 1, 1);
 
     void rendergame(bool mainpass)
     {
@@ -212,6 +213,11 @@ namespace game
             if(d == player1 || d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue;
             int team = 0;
             if(teamskins || m_teammode) team = isteam(player1->team, d->team) ? 1 : 2;
+            if(player1->state == CS_SPECTATOR && specautoteams && (teamskins || m_teammode))
+            {
+                fpsent *follow = followingplayer();
+                if(follow != NULL) { team = (isteam(follow->team, d->team)) ? 1 : 2; }
+            }
             renderplayer(d, getplayermodelinfo(d), team, 1, mainpass);
             copystring(d->info, colorname(d));
             if(d->maxhealth>100) { defformatstring(sn)(" +%d", d->maxhealth-100); concatstring(d->info, sn); }
