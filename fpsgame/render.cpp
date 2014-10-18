@@ -190,7 +190,7 @@ namespace game
     VARP(teamskins, 0, 0, 1);
     XIDENT(IDF_SWLACC, FVARP, playernamesize, 2.0f, 2.0f, 10.0f);
     XIDENT(IDF_SWLACC, VARP, playernamezoffset, 0, 0, 10);
-    XIDENT(IDF_SWLACC, VARP, specautoteam, 0, 1, 1);
+    XIDENT(IDF_SWLACC, VARP, specautoteam, 0, 0, 1);
 
     void rendergame(bool mainpass)
     {
