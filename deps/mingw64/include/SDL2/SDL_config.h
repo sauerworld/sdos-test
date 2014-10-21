@@ -98,7 +98,7 @@
 #define HAVE_MEMSET 1
 #define HAVE_MEMCPY 1
 #define HAVE_MEMMOVE 1
-#define HAVE_MEMCMP 1
+/* #undef HAVE_MEMCMP */
 #define HAVE_STRLEN 1
 /* #undef HAVE_STRLCPY */
 /* #undef HAVE_STRLCAT */
@@ -121,7 +121,7 @@
 #define HAVE__UI64TOA 1
 #define HAVE_STRTOLL 1
 #define HAVE_STRTOULL 1
-#define HAVE_STRTOD 1
+/* #undef HAVE_STRTOD */
 #define HAVE_ATOI 1
 #define HAVE_ATOF 1
 #define HAVE_STRCMP 1
@@ -208,7 +208,7 @@
 /* #undef SDL_AUDIO_DRIVER_DISK */
 /* #undef SDL_AUDIO_DRIVER_DUMMY */
 /* #undef SDL_AUDIO_DRIVER_ANDROID */
-#define SDL_AUDIO_DRIVER_XAUDIO2 1
+/* #undef SDL_AUDIO_DRIVER_XAUDIO2 */
 #define SDL_AUDIO_DRIVER_DSOUND 1
 /* #undef SDL_AUDIO_DRIVER_ESD */
 /* #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC */
