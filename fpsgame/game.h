@@ -724,6 +724,7 @@ namespace game
     extern const char *chatcolorname(fpsent *d);
     extern fpsent *pointatplayer();
     extern fpsent *hudplayer();
+    extern fpsent *autohudplayer();
     extern fpsent *followingplayer();
     extern fpsent *statsclient();
     extern void stopfollowing();

@@ -190,7 +190,6 @@ namespace game
     VARP(teamskins, 0, 0, 1);
     XIDENT(IDF_SWLACC, FVARP, playernamesize, 2.0f, 2.0f, 10.0f);
     XIDENT(IDF_SWLACC, VARP, playernamezoffset, 0, 0, 10);
-    XIDENT(IDF_SWLACC, VARP, specautoteam, 0, 0, 1);
 
     void rendergame(bool mainpass)
     {
@@ -212,50 +211,47 @@ namespace game
             fpsent *d = players[i];
             if(d == player1 || d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue;
             int team = 0;
-            if(teamskins || m_teammode) team = isteam(player1->team, d->team) ? 1 : 2;
-            if(player1->state == CS_SPECTATOR && specautoteam && (teamskins || m_teammode))
-            {
-                fpsent *follow = followingplayer();
-                if(follow != NULL) { team = (isteam(follow->team, d->team)) ? 1 : 2; }
-            }
+            if(teamskins || m_teammode) team = isteam(autohudplayer()->team, d->team) ? 1 : 2;
             renderplayer(d, getplayermodelinfo(d), team, 1, mainpass);
             copystring(d->info, colorname(d));
             if(d->maxhealth>100) { defformatstring(sn)(" +%d", d->maxhealth-100); concatstring(d->info, sn); }
             
-            bool specorsameteam = (player1->state==CS_SPECTATOR) ? true : isteam(player1->team, d->team);
-            if(showteamhealth == 1 && m_teammode && !m_insta && specorsameteam)
+            if((isteam(autohudplayer()->team, d->team) || player1->state == CS_SPECTATOR) && m_teammode && !m_insta) switch(showteamhealth)
             {
-                string healthcolor, armourcolor;
-                if(d->health <= 25) strcpy(healthcolor, "\f3");
-                else if(d->health <= 50) strcpy(healthcolor, "\f6");
-                else strcpy(healthcolor, "\f0");
-                if(d->armour <= 25) strcpy(armourcolor, "\f3");
-                else if(d->armour <= 50) strcpy(armourcolor, "\f6");
-                else strcpy(armourcolor, "\f0");
-                defformatstring(thpa)("\n%s%d\f7|%s%d", healthcolor, d->health, armourcolor, d->armour); concatstring(d->info, thpa);
+                case 1:
+                    string healthcolor, armourcolor;
+                    if(d->health <= 25) strcpy(healthcolor, "\f3");
+                    else if(d->health <= 50) strcpy(healthcolor, "\f6");
+                    else strcpy(healthcolor, "\f0");
+                    if(d->armour <= 25) strcpy(armourcolor, "\f3");
+                    else if(d->armour <= 50) strcpy(armourcolor, "\f6");
+                    else strcpy(armourcolor, "\f0");
+                    defformatstring(thpa)("\n%s%d\f7|%s%d", healthcolor, d->health, armourcolor, d->armour); concatstring(d->info, thpa);
+                    break;
+                case 2:
+                    int hmtype = PART_METER, hvalue = d->health, hcolor = 0x00FF00, hcolor2 = 0;
+                    int amtype = PART_METER, avalue = d->armour, acolor = 0xFF4500, acolor2 = 0;
+                    if(d->health > 100) {
+                        hcolor = 0x006400; hcolor2 = 0x00FF00; hvalue = d->health - 100; hmtype = PART_METER_VS;
+                    }
+                    if((d->armourtype==A_YELLOW) && (d->armour > 100)) { // maybe just d->armour>100     >.<'
+                        acolor = 0xFFD700; acolor2 = 0xFF4500; avalue = d->armour - 100; amtype = PART_METER_VS;
+                    }
+                    particle_health(d->abovehead().add(vec(0, 0, -2)), avalue/100.0f, amtype, 1, acolor, acolor2, 1.0f);
+                    particle_health(d->abovehead().add(vec(0, 0, -1)), hvalue/100.0f, hmtype, 1, hcolor, hcolor2, 1.0f);
+                    break;
             }
-            else if( showteamhealth == 2 && m_teammode && !m_insta && specorsameteam)
-            {
-            	int hmtype = PART_METER, hvalue = d->health, hcolor = 0x00FF00, hcolor2 = 0;
-				int amtype = PART_METER, avalue = d->armour, acolor = 0xFF4500, acolor2 = 0;
-				if(d->health > 100) {
-					hcolor = 0x006400; hcolor2 = 0x00FF00; hvalue = d->health - 100; hmtype = PART_METER_VS;
-				}
-				if((d->armourtype==A_YELLOW) && (d->armour > 100)) { // maybe just d->armour>100     >.<'
-					acolor = 0xFFD700; acolor2 = 0xFF4500; avalue = d->armour - 100; amtype = PART_METER_VS;
-				}
-				particle_health(d->abovehead().add(vec(0, 0, -2)), avalue/100.0f, amtype, 1, acolor, acolor2, 1.0f);
-				particle_health(d->abovehead().add(vec(0, 0, -1)), hvalue/100.0f, hmtype, 1, hcolor, hcolor2, 1.0f);
-            }
-            if (d->state!=CS_DEAD && showteamhealth && specorsameteam) particle_text(d->abovehead().add(vec(0, 0, 1+showteamhealth+playernamezoffset)), d->info, PART_TEXT, 1, team ? (team==1 ? 0x6496FF : 0xFF4B19) : 0x1EC850, (player1->o.dist(d->o)) > 10*playernamesize ? playernamesize : (player1->o.dist(d->o))/10 );
-            else if (d->state!=CS_DEAD) particle_text(d->abovehead().add(vec(0, 0, playernamezoffset)), d->info, PART_TEXT, 1, team ? (team==1 ? 0x6496FF : 0xFF4B19) : 0x1EC850, (player1->o.dist(d->o)) > 10*playernamesize ? playernamesize : (player1->o.dist(d->o))/10 );
+            if (d->state!=CS_DEAD && showteamhealth && isteam(autohudplayer()->team, d->team))
+            	particle_text(d->abovehead().add(vec(0, 0, 1+showteamhealth+playernamezoffset)), d->info, PART_TEXT, 1, team ? (team==1 ? 0x6496FF : 0xFF4B19) : 0x1EC850, (player1->o.dist(d->o)) > 10*playernamesize ? playernamesize : (player1->o.dist(d->o))/10 );
+            else if (d->state!=CS_DEAD) 
+            	particle_text(d->abovehead().add(vec(0, 0, playernamezoffset)), d->info, PART_TEXT, 1, team ? (team==1 ? 0x6496FF : 0xFF4B19) : 0x1EC850, (player1->o.dist(d->o)) > 10*playernamesize ? playernamesize : (player1->o.dist(d->o))/10 );
 
         }
         loopv(ragdolls)
         {
             fpsent *d = ragdolls[i];
             int team = 0;
-            if(teamskins || m_teammode) team = isteam(player1->team, d->team) ? 1 : 2;
+            if(teamskins || m_teammode) team = isteam(autohudplayer()->team, d->team) ? 1 : 2;
             float fade = 1.0f;
             if(ragdollmillis && ragdollfade) 
                 fade -= clamp(float(lastmillis - (d->lastupdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);

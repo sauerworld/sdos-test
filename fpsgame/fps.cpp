@@ -7,6 +7,7 @@ namespace game
 {
 	XIDENT(IDF_SWLACC, VARP, chatcolors, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, speccolors, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, specautoteam, 0, 0, 1);
 
     fpsent *lasttkvictim = NULL;
     fpsent *lasttkculprit = NULL;
@@ -153,6 +154,12 @@ namespace game
         if(thirdperson) return player1;
         fpsent *target = followingplayer();
         return target ? target : player1;
+    }
+
+    fpsent *autohudplayer()
+    {
+        if(player1->state != CS_SPECTATOR || followingplayer() == NULL) return player1;
+        return (specautoteam) ? followingplayer() : player1;
     }
 
     void setupcamera()
@@ -921,7 +928,7 @@ namespace game
             if(f) 
             {
                 int color;
-                if(speccolors && m_teammode)
+                if(speccolors && !specautoteam && m_teammode)
                 {
                     color = (isteam(player1->team, f->team)) ? 0x60A0FF : 0xFF4040;
                 }
@@ -942,7 +949,7 @@ namespace game
             }
         }
 
-        fpsent *d = hudplayer();
+        fpsent *d = autohudplayer();
         if(d->state!=CS_EDITING)
         {
             if(d->state!=CS_SPECTATOR) drawhudicons(d);

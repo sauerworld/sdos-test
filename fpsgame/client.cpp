@@ -75,7 +75,7 @@ namespace game
             {
                 if(!alive++) 
                 {
-                    settexture(isteam(d->team, player1->team) ? "packages/hud/blip_blue_alive.png" : "packages/hud/blip_red_alive.png");
+                    settexture(isteam(d->team, autohudplayer()->team) ? "packages/hud/blip_blue_alive.png" : "packages/hud/blip_red_alive.png");
                     glBegin(GL_QUADS);
                 }
                 drawteammate(d, x, y, s, o, scale);
@@ -89,7 +89,7 @@ namespace game
             {
                 if(!dead++) 
                 {
-                    settexture(isteam(d->team, player1->team) ? "packages/hud/blip_blue_dead.png" : "packages/hud/blip_red_dead.png");
+                    settexture(isteam(d->team, autohudplayer()->team) ? "packages/hud/blip_blue_dead.png" : "packages/hud/blip_red_dead.png");
                     glBegin(GL_QUADS);
                 }
                 drawteammate(d, x, y, s, o, scale);
