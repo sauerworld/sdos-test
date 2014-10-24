@@ -156,11 +156,11 @@ namespace game
         return target ? target : player1;
     }
 
-    fpsent *autohudplayer()
-    {
-        if(player1->state != CS_SPECTATOR || followingplayer() == NULL) return player1;
-        return (specautoteam) ? followingplayer() : player1;
-    }
+	fpsent *autohudplayer()
+	{
+	    if(player1->state != CS_SPECTATOR || followingplayer() == NULL || !specautoteam) return player1;
+	    return followingplayer();
+	}
 
     void setupcamera()
     {
@@ -949,11 +949,12 @@ namespace game
             }
         }
 
-        fpsent *d = autohudplayer();
+        fpsent *a = autohudplayer();
+        fpsent *d = hudplayer();
         if(d->state!=CS_EDITING)
         {
             if(d->state!=CS_SPECTATOR) drawhudicons(d);
-            if(cmode) cmode->drawhud(d, w, h);
+            if(cmode) cmode->drawhud(a, w, h);
         }
 
         glPopMatrix();

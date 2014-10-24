@@ -337,7 +337,7 @@ namespace game
         const playermodelinfo &mdl = getplayermodelinfo(d);
         defformatstring(gunname)("%s/%s", hudgunsdir[0] ? hudgunsdir : mdl.hudguns, guns[d->gunselect].file);
         if((m_teammode || teamskins) && teamhudguns)
-            concatstring(gunname, d==player1 || isteam(d->team, player1->team) ? "/blue" : "/red");
+            concatstring(gunname, d==player1 || isteam(d->team, autohudplayer()->team) ? "/blue" : "/red");
         else if(testteam > 1)
             concatstring(gunname, testteam==2 ? "/blue" : "/red");
         modelattach a[2];
