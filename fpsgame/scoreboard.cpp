@@ -200,7 +200,7 @@ namespace game
             scoregroup &sg = *groups[k];
             //int bgcolor = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? 0x3030C0 : 0xC03030) : 0,
             //    fgcolor = 0xFFFF80;
-            int teamcolor = sg.team && m_teammode ? (isteam(player1->team, sg.team) ? COL_BLUE : COL_RED) : COL_WHITE; // flat gui
+            int teamcolor = sg.team && m_teammode ? (isteam(autohudplayer()->team, sg.team) ? COL_BLUE : COL_RED) : COL_WHITE; // flat gui
 
             g.pushlist(); // vertical
             g.pushlist(); // horizontal
