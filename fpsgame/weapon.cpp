@@ -512,6 +512,10 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
         return true;
     }
 
+    XIDENT(IDF_SWLACC, HVARP, rlflarecolor, 0, 0x404040, 0xFFFFFF);
+    XIDENT(IDF_SWLACC, FVARP, rlflaresize, 0, 2.4f, 5.0f);
+    XIDENT(IDF_SWLACC, VARP, rltrailtime, 0, 300, 1000);
+
     void updateprojectiles(int time)
     {
         static int lastbouncersmoke = -1000;
@@ -569,7 +573,12 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
                             }
                             particle_splash(guns[p.gun].part, 1, 1, pos, color, 4.8f, 150, 20);
                         }
-                        else regular_particle_splash(PART_SMOKE, 2, 300, pos, 0x404040, 2.4f, 50, -20);
+                        else 
+                        {
+                            if (p.gun == GUN_RL) regular_particle_splash(PART_SMOKE, 2, rltrailtime, pos, rlflarecolor, rlflaresize, 50, -20);
+                            else regular_particle_splash(PART_SMOKE, 2, 300, pos, 0x404040, 2.4f, 50, -20);
+                        }
+
                     }
                 }
             }
@@ -594,17 +603,14 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
     // gun particle flare colors
     XIDENT(IDF_SWLACC, HVARP, sgflarecolor, 0, 0xFFC864, 0xFFFFFF);
     XIDENT(IDF_SWLACC, HVARP, cgflarecolor, 0, 0xFFC864, 0xFFFFFF);
-    //XIDENT(IDF_SWLACC, HVARP, rlflarecolor, 0, 0xFFFFFF, 0xFFFFFF);
     XIDENT(IDF_SWLACC, HVARP, riflarecolor, 0, 0x404040, 0xFFFFFF);
     // gun particle_flare sizes
     XIDENT(IDF_SWLACC, FVARP, sgflaresize, 0, 0.28f, 5.0f);
     XIDENT(IDF_SWLACC, FVARP, cgflaresize, 0, 0.28f, 5.0f);
-    //XIDENT(IDF_SWLACC, FVARP, rlflaresize, 0, 1.5f, 5.0f);
     XIDENT(IDF_SWLACC,FVARP, riflaresize, 0, 0.6f, 5.0f);
     // gun particle_flare trail time in ms
     XIDENT(IDF_SWLACC, VARP, sgtrailtime, 0, 300, 1000);
     XIDENT(IDF_SWLACC, VARP, cgtrailtime, 0, 600, 1000);
-    //XIDENT(IDF_SWLACC, VARP, rltrailtime, 0, 200, 1000);
     XIDENT(IDF_SWLACC, VARP, ritrailtime, 0, 400, 1000);
 
     void shoteffects(int gun, const vec &from, const vec &to, fpsent *d, bool local, int id, int prevaction)     // create visual effect from a shot
