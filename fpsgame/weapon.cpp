@@ -677,7 +677,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
 
             case GUN_RIFLE:
                 if(!reducesparks) particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f);
-                particle_trail(PART_SMOKE, ritrailtime, hudgunorigin(gun, from, to, d), to, riflarecolor, riflaresize, riflegravity);
+                if(ritrailtime) particle_trail(PART_SMOKE, ritrailtime, hudgunorigin(gun, from, to, d), to, riflarecolor, riflaresize, riflegravity);
                 if(muzzleflash && d->muzzle.x >= 0)
                     particle_flare(d->muzzle, d->muzzle, 150, PART_MUZZLE_FLASH3, 0xFFFFFF, 1.25f, d);
                 if(!local) adddecal(DECAL_BULLET, to, vec(from).sub(to).normalize(), 3.0f);
