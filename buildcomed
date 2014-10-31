@@ -42,13 +42,9 @@ then
 	cp -r pak comed
 	mkdir comed/bin_unix
 	cp INSTALL.lin comed/install.txt
-	echo ""
-	echo "WARNING"
-	echo "Linux32 is not supported yet."
-	echo ""
-	#make PREFIX=i686-unknown-linux-gnu
-	#mv sauer_client comed/bin_unix/linux_client
-	#make clean
+	make PREFIX=i686-unknown-linux-gnu
+	mv sauer_client comed/bin_unix/linux_client
+	make clean
 	make PREFIX=x86_64-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_64_client
 	zip -r comed-nightly-linux.zip comed
