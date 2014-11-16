@@ -613,7 +613,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
     XIDENT(IDF_SWLACC, VARP, cgtrailtime, 0, 600, 1000);
     XIDENT(IDF_SWLACC, VARP, ritrailtime, 0, 400, 1000);
     // gravity
-    XIDENT(IDF_SWLACC, VARP, riflegravity, 0, 20, 20);
+    XIDENT(IDF_SWLACC, VARP, riflegravity, 0, 1, 1);
 
     void shoteffects(int gun, const vec &from, const vec &to, fpsent *d, bool local, int id, int prevaction)     // create visual effect from a shot
     {
@@ -677,7 +677,7 @@ XIDENT(IDF_SWLACC, VARP, smokefps, 0, 80, 200);
 
             case GUN_RIFLE:
                 if(!reducesparks) particle_splash(PART_SPARK, 200, 250, to, 0xB49B4B, 0.24f);
-                if(ritrailtime) particle_trail(PART_SMOKE, ritrailtime, hudgunorigin(gun, from, to, d), to, riflarecolor, riflaresize, riflegravity);
+                if(ritrailtime) particle_trail(PART_SMOKE, ritrailtime, hudgunorigin(gun, from, to, d), to, riflarecolor, riflaresize, (riflegravity) ? 20 : 0);
                 if(muzzleflash && d->muzzle.x >= 0)
                     particle_flare(d->muzzle, d->muzzle, 150, PART_MUZZLE_FLASH3, 0xFFFFFF, 1.25f, d);
                 if(!local) adddecal(DECAL_BULLET, to, vec(from).sub(to).normalize(), 3.0f);
