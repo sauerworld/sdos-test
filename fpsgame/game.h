@@ -546,6 +546,15 @@ struct fpsent : dynent, fpsstate
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
+
+    fpsent *lastvictim;
+    fpsent *lastkiller;
+    fpsent *lastdamagecauser;
+    int lastfragtime;
+    int lastfragweapon;
+    int lastdeathtime;
+    int lastdeathweapon;
+    int lastddweapon, lastdrweapon;
     
     int sgdamage, sgshots;
     int cgdamage, cgshots;
@@ -566,6 +575,9 @@ struct fpsent : dynent, fpsstate
     {
         sgshots = cgshots = rlshots = rishots = glshots = fistshots = pistolshots = 0;
         sgdamage = cgdamage = rldamage = ridamage = gldamage = fistdamage = pistoldamage = 0;
+        lastvictim = lastkiller = lastdamagecauser = NULL;
+        lastfragtime = lastdeathtime = 0;
+        lastfragweapon = lastdeathweapon = lastddweapon = lastdrweapon = -1;
         name[0] = team[0] = info[0] = 0;
         respawn();
     }
@@ -813,12 +825,46 @@ namespace game
 
     // scoreboard
     extern void showscores(bool on);
-    extern void getbestplayers(vector<fpsent *> &best);
+    extern void getbestplayers(vector<fpsent *> &best, bool fulllist = false);
     extern void getbestteams(vector<const char *> &best);
     extern hashset<teaminfo> teaminfos;
     extern void clearteaminfo();
     extern void setteaminfo(const char *team, int frags);
+    
+    extern int scoreboard2d;
+    extern void renderscoreboard(g3d_gui &g, bool firstpas);
+    struct scoreboardgui : g3d_callback
+    {
+        bool showing;
+        vec menupos;
+        int menustart;
 
+        scoreboardgui() : showing(false) {}
+
+        void show(bool on)
+        {
+            if(!showing && on)
+            {
+                menupos = menuinfrontofplayer();
+                menustart = starttime();
+            }
+            showing = on;
+        }
+
+        void gui(g3d_gui &g, bool firstpass)
+        {
+            g.start(menustart, 0.03f, NULL, false);
+            renderscoreboard(g, firstpass);
+            g.end();
+        }
+
+        void render()
+        {
+            if(showing) g3d_addgui(this, menupos, (scoreboard2d ? GUI_FORCE_2D : GUI_2D | GUI_FOLLOW) | GUI_BOTTOM);
+        }
+    };
+    extern scoreboardgui scoreboard;
+    
     // render
     struct playermodelinfo
     {

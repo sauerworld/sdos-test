@@ -1162,6 +1162,8 @@ int main(int argc, char **argv)
     }
 
     execfile("sdos.cfg", false);
+    
+    execfile("comed-gui.cfg", true);
 
     initing = NOT_INITING;
 
@@ -1250,7 +1252,7 @@ int main(int argc, char **argv)
     {
         executestr(sdos_scripts[i]);
     }
-
+    
     initing = NOT_INITING;
 
     identflags &= ~IDF_PERSIST;

@@ -10,7 +10,7 @@ then
 	then 
 		arch=$1
 	else
-		echo "Unknown arch, try: win, lin, mac or macX"
+		echo "Unknown arch value, try: win, lin, mac or macX"
 		exit
 	fi
 else
@@ -27,10 +27,9 @@ then
 	cp -r pak comed
 	mkdir comed/bin
 	mkdir comed/bin64
-	cp INSTALL.txt comed/install.txt
+	cp INSTALL.md comed/INSTALL.txt
 	make PREFIX=i686-w64-mingw32
 	mv sauerbraten.exe comed/bin/sauerbraten.exe
-	make clean
 	make PREFIX=x86_64-w64-mingw32
 	mv sauerbraten.exe comed/bin64/sauerbraten.exe
 	zip -r comed-nightly-windows.zip comed
@@ -41,10 +40,9 @@ if [[ "$arch" == "lin" ]]
 then 
 	cp -r pak comed
 	mkdir comed/bin_unix
-	cp INSTALL.lin comed/install.txt
+	cp INSTALL.md comed/INSTALL.txt
 	make PREFIX=i686-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_client
-	make clean
 	make PREFIX=x86_64-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_64_client
 	zip -r comed-nightly-linux.zip comed
@@ -54,11 +52,11 @@ fi
 if [[ "$arch" == "mac" ]]
 then 
 	echo ""
-	echo "note, this fails on darwin kernels > 13.2.0, e.g. osX 10.9"
+	echo "note: this fails on darwin kernels > 13.2.0, e.g. OS X 10.9"
 	echo "quickfix should be to rename the deps/*darwin* dir to the propper version number"
 	echo ""
 	cp -r pak comed
-	cp INSTALL.osx comed/install.txt
+	cp INSTALL.md comed/INSTALL.txt
 	make PREFIX=x86_64-apple-darwin13.2.0
 	mv sauerbraten comed/
 	zip -r comed-nightly-osx.zip comed
@@ -72,7 +70,7 @@ then
 	echo "see http://github.com/tpoechtrager/osxcross"
 	echo ""
 	cp -r pak comed
-	cp INSTALL.osx comed/install.txt
+	cp INSTALL.md comed/INSTALL.txt
 	make CXX=x86_64-apple-darwin13-clang++ CC=x86_64-apple-darwin13-clang PREFIX=x86_64-apple-darwin13 STRIP=x86_64-apple-darwin13-strip
 	mv sauerbraten comed/
 	zip -r comed-nightly-osx.zip comed

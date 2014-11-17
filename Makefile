@@ -1,7 +1,7 @@
 include deps/platform.mk
 
-override CFLAGS+= -Ideps/$(DEPSNAME)/include/SDL2 -Ishared -Iengine -Ifpsgame -Wall -fsigned-char
-override CXXFLAGS+= -Ideps/$(DEPSNAME)/include/SDL2 -Ishared -Iengine -Ifpsgame -std=gnu++0x -Wall -fsigned-char -fno-exceptions -fno-rtti
+override CFLAGS+= -Ideps/$(DEPSNAME)/include/SDL2 -Ishared -Iengine -Ifpsgame -Imod -Wall -fsigned-char
+override CXXFLAGS+= -Ideps/$(DEPSNAME)/include/SDL2 -Ishared -Iengine -Ifpsgame -Imod -std=gnu++0x -Wall -fsigned-char -fno-exceptions -fno-rtti
 ifneq (,$(findstring -ggdb,$(CXXFLAGS)))
   STRIP=true
   UPX=true
@@ -64,7 +64,8 @@ CLIENT_OBJS:= \
 	fpsgame/server.o \
 	fpsgame/waypoint.o \
 	fpsgame/weapon.o \
-	fpsgame/cdemo.o
+	mod/cdemo.o \
+	mod/comed.o
 MACOBJC:= \
 	xcode/Launcher.o \
 	xcode/main.o
@@ -175,15 +176,15 @@ engine/water.o:		engine/engine.h
 engine/world.o:		engine/engine.h
 engine/worldio.o:	engine/engine.h
 fpsgame/ai.o:		fpsgame/game.h
-fpsgame/client.o:	fpsgame/game.h fpsgame/capture.h fpsgame/ctf.h fpsgame/collect.h fpsgame/cdemo.h
+fpsgame/client.o:	fpsgame/game.h fpsgame/capture.h fpsgame/ctf.h fpsgame/collect.h mod/cdemo.h
 fpsgame/cdemo.o:	fpsgame/game.h
 fpsgame/entities.o:	fpsgame/game.h
-fpsgame/fps.o:		fpsgame/game.h
+fpsgame/fps.o:		fpsgame/game.h mod/comed.h
 fpsgame/game.h:		shared/cube.h fpsgame/ai.h
 fpsgame/monster.o:	fpsgame/game.h
 fpsgame/movable.o:	fpsgame/game.h
 fpsgame/render.o:	fpsgame/game.h
-fpsgame/scoreboard.o:	fpsgame/game.h
+fpsgame/scoreboard.o:	fpsgame/game.h mod/comed.h
 fpsgame/server.o:	fpsgame/game.h fpsgame/capture.h fpsgame/ctf.h fpsgame/collect.h fpsgame/extinfo.h fpsgame/aiman.h
 fpsgame/waypoint.o:	fpsgame/game.h
 fpsgame/weapon.o:	fpsgame/game.h
@@ -200,3 +201,4 @@ xcode/main.o:		xcode/Launcher.h
 quirks/oldglibc32.o:	quirks/wrapper.hpp
 quirks/oldglibc64.o:	quirks/wrapper.hpp
 
+mod/comed.o:		fpsgame/game.h mod/comed.h

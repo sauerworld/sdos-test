@@ -1,6 +1,0 @@
-To install the client, just replace the executables (sauerbraten.exe) in your Sauerbraten\bin and Sauerbraten\bin64 folders with the ones provided in this archive.
-Then copy the data and packages directories to your configuration directory, something like: C:\...\My Documents}My games\Sauerbraten\
-
-
-
-You might want to make a backup first.

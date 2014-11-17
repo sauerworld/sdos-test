@@ -110,9 +110,15 @@ struct delayedupdate
 };
      
 static hashtable<const char *, menu> guis;
-static vector<menu *> guistack;
+vector<menu *> guistack;
 static vector<delayedupdate> updatelater;
 static bool shouldclearmenu = true, clearlater = false;
+
+bool guiisshowing()
+{ 
+    if(guistack.empty()) return false; 
+    return true;
+}
 
 VARP(menudistance,  16, 40,  256);
 VARP(menuautoclose, 32, 120, 4096);

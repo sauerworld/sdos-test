@@ -445,7 +445,9 @@ struct collectclientmode : clientmode
     }
 
     void drawhud(fpsent *d, int w, int h)
-    {
+    {   
+        if(guiisshowing()) return;
+        
         holdscreenlock;
         if(d->state == CS_ALIVE && d->tokens > 0)
         {

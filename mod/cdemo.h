@@ -3,7 +3,8 @@
 
 #include "game.h"
 
-namespace cdemo{
+namespace cdemo
+{
 
 bool recording();
 
@@ -12,9 +13,9 @@ void ctfinit(ucharbuf& p);
 void captureinit(ucharbuf& p);
 void collectinit(ucharbuf& p);
 
-ENetPacket* packet(int chan, const ENetPacket* p);                     //N_POS, N_JUMPPAD, N_TELEPORT, server->client catchall
+ENetPacket* packet(int chan, const ENetPacket* p); //N_POS, N_JUMPPAD, N_TELEPORT, server->client catchall
 void packet(int chan, const ucharbuf& p);
-void addmsghook(int type, int cn, const ucharbuf& p);          //save packets that server doesn't send back
+void addmsghook(int type, int cn, const ucharbuf& p); //save packets that server doesn't send back
 //packets that change format between client->server and server->client
 void sayteam(const char* msg);
 void clipboard(int plainlen, int packlen, const uchar* data);
@@ -24,8 +25,10 @@ void shotfx(int cn, int gun, int id, const vec& from, const vec& to);
 
 void stop();
 
-extern int cdemoauto;
+extern int cdemoauto;   
+void keepdemo(int *keep);
 
 }
 
+extern string homedir;
 #endif

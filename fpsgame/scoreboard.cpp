@@ -1,6 +1,7 @@
 // creation of scoreboard
 #include "game.h"
 #include "colors.h"
+#include "comed.h"
 
 namespace game
 {
@@ -21,7 +22,8 @@ namespace game
     XIDENT(IDF_SWLACC, VARP, showsuicides, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, showkpd, 0, 0, 1);
 
-
+    scoreboardgui scoreboard;
+    
     hashset<teaminfo> teaminfos;
 
     void clearteaminfo()
@@ -54,7 +56,7 @@ namespace game
         return strcmp(a->name, b->name) < 0;
     }
 
-    void getbestplayers(vector<fpsent *> &best)
+    void getbestplayers(vector<fpsent *> &best, bool fulllist)
     {
         loopv(players)
         {
@@ -62,7 +64,9 @@ namespace game
             if(o->state!=CS_SPECTATOR) best.add(o);
         }
         best.sort(playersort);
-        while(best.length() > 1 && best.last()->frags < best[0]->frags) best.drop();
+        if(!fulllist)
+            while(best.length() > 1 && best.last()->frags < best[0]->frags) 
+                best.drop();
     }
 
     void getbestteams(vector<const char *> &best)
@@ -88,12 +92,12 @@ namespace game
         }
     }
 
-    struct scoregroup : teamscore
-    {
-        vector<fpsent *> players;
-    };
     static vector<scoregroup *> groups;
     static vector<fpsent *> spectators;
+    
+    vector<scoregroup *> getscoregroups() {
+        return groups; 
+    }
 
     static inline bool scoregroupcmp(const scoregroup *x, const scoregroup *y)
     {
@@ -109,7 +113,7 @@ namespace game
         return x->team && y->team && strcmp(x->team, y->team) < 0;
     }
 
-    static int groupplayers()
+    int groupplayers()
     {
         int numgroups = 0;
         spectators.setsize(0);
@@ -520,38 +524,6 @@ namespace game
             }
         }
     }
-
-    struct scoreboardgui : g3d_callback
-    {
-        bool showing;
-        vec menupos;
-        int menustart;
-
-        scoreboardgui() : showing(false) {}
-
-        void show(bool on)
-        {
-            if(!showing && on)
-            {
-                menupos = menuinfrontofplayer();
-                menustart = starttime();
-            }
-            showing = on;
-        }
-
-        void gui(g3d_gui &g, bool firstpass)
-        {
-            g.start(menustart, 0.03f, NULL, false);
-            renderscoreboard(g, firstpass);
-            g.end();
-        }
-
-        void render()
-        {
-            if(showing) g3d_addgui(this, menupos, (scoreboard2d ? GUI_FORCE_2D : GUI_2D | GUI_FOLLOW) | GUI_BOTTOM);
-        }
-
-    } scoreboard;
 
     void g3d_gamemenus()
     {

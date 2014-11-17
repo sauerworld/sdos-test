@@ -2,6 +2,7 @@
 #include "cdemo.h"
 
 extern int identflags;
+extern bool guiisshowing();
 
 namespace game
 {
@@ -9,6 +10,8 @@ namespace game
     VARP(maxradarscale, 1, 1024, 10000);
     VARP(radarteammates, 0, 1, 1);
     FVARP(minimapalpha, 0, 1, 1);
+    XIDENT(IDF_SWLACC, VARP, flatgui, 0, 1, 1);
+
 
     float calcradarscale()
     {
@@ -97,11 +100,11 @@ namespace game
         }
         if(dead) glEnd();
     }
-        
+    
     #include "capture.h"
     #include "ctf.h"
     #include "collect.h"
-
+           
     clientmode *cmode = NULL;
     captureclientmode capturemode;
     ctfclientmode ctfmode;
@@ -1485,11 +1488,9 @@ namespace game
                 s->lastaction = lastmillis;
                 s->lastattackgun = s->gunselect;
                 shoteffects(s->gunselect, from, to, s, false, id, prevaction);
-                /* add totalshots for other clients */
+                // add totalshots for other clients
                 int newshots = guns[s->gunselect].damage*(s->quadmillis ? 4 : 1)*guns[s->gunselect].rays;
-                
-                if ( s!=player1 ) s->totalshots += newshots;
-                
+                if(s!=player1) s->totalshots += newshots;
                 switch(s->gunselect)
                 {
                     case GUN_FIST: s->fistshots += newshots; break;
@@ -1524,15 +1525,14 @@ namespace game
                 if(!target || !actor) break;
                 target->armour = armour;
                 target->health = health;
-
-                if (actor == player1) target->damagereceived += damage;
-                if (actor != player1 && actor != target)
+                target->lastdamagecauser = actor;
+                if(actor == player1) target->damagereceived += damage;
+                if(actor != player1 && actor != target)
                 {
-                    if( (actor!=target) ) { actor->totaldamage += damage; target->damagereceived += damage;}
-                    else if( isteam(actor->team, target->team) && (actor != target) ) { actor->totaldamage += damage; target->damagereceived += damage; }// count self caused teamdamage to totaldamage
+                    actor->totaldamage += damage;
+                    target->damagereceived += damage;
                 }
-
-                if ((actor != player1 || target != player1) && actor != target) switch (actor->gunselect)
+                if((actor != player1 || target != player1) && actor != target) switch (actor->gunselect)
                 {
                     case GUN_FIST: actor->fistdamage += damage; break;
                     case GUN_SG: actor->sgdamage += damage; break;
@@ -1542,7 +1542,6 @@ namespace game
                     case GUN_GL: actor->gldamage += damage; break;
                     case GUN_PISTOL: actor->pistoldamage += damage; break;
                 }
-                
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false);
                 break;
@@ -1552,9 +1551,13 @@ namespace game
             {
                 int tcn = getint(p), gun = getint(p), damage = getint(p);
                 fpsent *target = getclient(tcn);
+                fpsent *actor;
                 vec dir;
                 loopk(3) dir[k] = getint(p)/DNF;
-                if(target) target->hitpush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, gun);
+                if(!target) break; 
+                target->hitpush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, gun);
+                actor = target->lastdamagecauser;
+                actor->lastddweapon = target->lastdrweapon = gun;
                 break;
             }
 
@@ -1572,6 +1575,10 @@ namespace game
                     particle_textcopy(actor->abovehead(), ds, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
                 }
                 if(!victim) break;
+                actor->lastvictim = victim;
+                victim->lastkiller = actor;
+                actor->lastfragtime = victim->lastdeathtime = lastmillis;
+                actor->lastfragweapon = victim->lastdeathweapon = (actor == victim) ? -1 : victim->lastdrweapon;
                 if(victim!=player1) victim->deaths += 1;
                 killed(victim, actor);
                 if(victim==actor) victim->suicides += 1;

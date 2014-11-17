@@ -471,8 +471,7 @@ struct ctfclientmode : clientmode
         vec dir = d->o;
         dir.sub(pos).div(scale);
         float size = flagblip ? 0.1f : 0.05f,
-              //xoffset = flagblip ? -2*(3/32.0f)*size : -size,
-        	  xoffset = -size, // flat gui
+              xoffset = flatgui || !flagblip ? -size : -2*(3/32.0f)*size,
               yoffset = flagblip ? -2*(1 - 3/32.0f)*size : -size,
               dist = dir.magnitude2(), maxdist = 1 - 0.05f - 0.05f;
         if(dist >= maxdist) dir.mul(maxdist/dist);
@@ -494,16 +493,18 @@ struct ctfclientmode : clientmode
     {
         return (h*(1 + 1 + 10))/(4*10);
     }
-
+    
     void drawhud(fpsent *d, int w, int h)
-    {
+    {   
+        if(guiisshowing()) return;
+
         holdscreenlock;
-        if(d->state == CS_ALIVE)
+        if(hudplayer()->state == CS_ALIVE)
         {
-            loopv(flags) if(flags[i].owner == d)
+            loopv(flags) if(flags[i].owner == hudplayer())
             {
                 int x = HICON_X + 3*HICON_STEP + (d->quadmillis ? HICON_SIZE + HICON_SPACE : 0);
-                drawicon(m_hold ? HICON_NEUTRAL_FLAG : (flags[i].team==ctfteamflag(autohudplayer()->team) ? HICON_BLUE_FLAG : HICON_RED_FLAG), x, HICON_Y);
+                drawicon(m_hold ? HICON_NEUTRAL_FLAG : (flags[i].team==ctfteamflag(d->team) ? HICON_BLUE_FLAG : HICON_RED_FLAG), x, HICON_Y);
                 if(m_hold)
                 {
                     glPushMatrix();

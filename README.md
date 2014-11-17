@@ -1,19 +1,64 @@
-# Sauerbraten Community Edition Client #
+Sauerbraten Community Edition
+===
+
+About ComEd
+---
+
+Sauerbraten Community Edition, short ComEd, is a Sauerbraten client providing additional features desired by the community that are not included in the official Sauerbraten release.
+In opposition to other projects, ComEd's development is not reserved to a defined group of developers. Instead, it encourages the whole community to contribute.
+Contribution can happen in any imaginable way: Be it via the submission of ideas, game content, source code or reporting of bugs - there can never be enough helping hands.
 
 
-Welcome to the Sauerbraten Community Edition!
-A client inspired by the Community.
+Features
+---
+
+The core features of ComEd v0.1 include:
+
+- detailed ammo bar
+- chat colors
+- (automatic) client-sided demo recording
+- eased demo navigation via `demotime`
+- extra event handlers, e.g. `onspawn`
+- *Flat GUI* for a more modern look
+- frag messages placed in the middle of the screen
+- placeable game clock
+- additional scoreboard columns
+- score hud
+- in-game team health display
+- spectating from the followed player's point of view
+- team killing information, e.g. `getlasttkvictim`
+- weapon accuracy variables
+- weapon trail customization
+
+Most of the options are changeable via a GUI by typing `/comed`.
+For a full list of commands, feel free to browse the [ComEd documentation](http://comed.sauerworld.org/documentation/).
+
+As the client is based on pisto's [SDoS Test Client](https://github.com/pisto/sdos-test), it also has all of its SDL2 features, allowing more direct input and an overall smoother gaming expecience.
 
 
-## What is this, just another client? 
+Installation
+---
 
-No this is not another client for Sauerbraten. Think of it, as your own client. Sauerbraten has been around for years, but a lot of desired features are lacking, many of which could be easy implemented. 
-Other games allow the players to customise the game environment a lot more than Sauerbraten does, which is a shame for an opensource game. This project aims to open the game to more customisation to suit the individual gamestyle of any player, making options accessible which the community desires. 
-This client won't be an effort of one person, but we invite the whole community to contribute. Whether with ideas or with actual written codelines, all is welcome. 
-
-Ofcourse, this asks the question where one draws the line between feature and an unfair advantage? The aim of the community edition is to raise the level of competitive gaming in sauerbraten but stay as close to the souce as possible. We don't intend to change the physics or weapon options, although we let this idea open for a possible follwoing Pro Edition with a new protocol version, so that this won't interferr with the original Sauerbraten, gameplay.
-All changes are being discussed on the [Sauerworld Forums](http://forum.sauerworld.org "Forum") and we encourage the whole community to take part in this process. 
+For installation instructions, read the *INSTALL.md* file.
 
 
+Compilation
+---
 
-For more information and documentation on the implemented features see community-edition.sauerworld.org
+The complete source code of ComEd is available via [GitHub](https://github.com/sauerworld/community-edition).
+
+For zipped release builds containing additional packages in pak/, use the included *buildcomed* script.
+	./buildcomed win|lin|mac|macX |noclean
+
+If you only want to compile the binaries, a simple `make` should suffice.
+For cross compilation, use an adequate PREFIX= argument (check *buildcomed* for possible values).
+
+
+Contact
+---
+
+In order to enhance ComEd, we really need **your** constructive feedback and ideas. You can contact us either via the Sauerworld forums or the GameSurge IRC network.
+
+- [Official ComEd website](http://comed.sauerworld.org)
+- [Sauerworld forums](http://sauerworld.org/forum/)
+- #sauerworld at irc.gamesurge.net

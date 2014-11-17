@@ -422,10 +422,10 @@ struct captureclientmode : clientmode
             if(skipenemy && b.enemy[0]) continue;
             switch(type)
             {
-                case 1: if(!b.owner[0] || strcmp(b.owner, autohudplayer()->team)) continue; break;
+                case 1: if(!b.owner[0] || strcmp(b.owner, d->team)) continue; break;
                 case 0: if(b.owner[0]) continue; break;
-                case -1: if(!b.owner[0] || !strcmp(b.owner, autohudplayer()->team)) continue; break;
-                case -2: if(!b.enemy[0] || !strcmp(b.enemy, autohudplayer()->team)) continue; break;
+                case -1: if(!b.owner[0] || !strcmp(b.owner, d->team)) continue; break;
+                case -2: if(!b.enemy[0] || !strcmp(b.enemy, d->team)) continue; break;
             }
             vec dir(d->o);
             dir.sub(b.o).div(scale);
@@ -464,9 +464,11 @@ struct captureclientmode : clientmode
     {
         return (h*(1 + 1 + 10))/(4*10);
     }
-
+    
     void drawhud(fpsent *d, int w, int h)
-    {
+    {   
+        if(guiisshowing()) return;
+        
         holdscreenlock;
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         int s = 1800/4, x = 1800*w/h - s - s/10, y = s/10;

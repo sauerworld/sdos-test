@@ -1,11 +1,12 @@
 #include "game.h"
 #include "colors.h"
+#include "comed.h"
 
 extern int multipoll;
 
 namespace game
 {
-	XIDENT(IDF_SWLACC, VARP, chatcolors, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, chatcolors, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, speccolors, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, specautoteam, 0, 0, 1);
 
@@ -156,11 +157,11 @@ namespace game
         return target ? target : player1;
     }
 
-	fpsent *autohudplayer()
-	{
-	    if(player1->state != CS_SPECTATOR || followingplayer() == NULL || !specautoteam) return player1;
-	    return followingplayer();
-	}
+    fpsent *autohudplayer()
+    {
+        if(player1->state != CS_SPECTATOR || followingplayer() == NULL || !specautoteam) return player1;
+        return followingplayer();
+    }
 
     void setupcamera()
     {
@@ -606,6 +607,9 @@ namespace game
             d->respawned = d->suicided = -2;
             d->sgshots = d->cgshots = d->rlshots = d->rishots = d->glshots = d->fistshots = d->pistolshots = 0;
             d->sgdamage = d->cgdamage = d->rldamage = d->ridamage = d->gldamage = d->fistdamage = d->pistoldamage = 0;
+            d->lastvictim = d->lastkiller = d->lastdamagecauser = NULL;
+            d->lastfragtime = d->lastdeathtime = 0;
+            d->lastfragweapon = d->lastdeathweapon = d->lastddweapon = d->lastdrweapon = -1;
         }
 
         setclientmode();
@@ -751,10 +755,10 @@ namespace game
         return cname[cidx];
     }    
     
-	const char *chatcolorname(fpsent *d) {
-		if (!chatcolors || !m_teammode || d->state == CS_SPECTATOR) return colorname(d);
-		return colorname(d, NULL, isteam(d->team, player1->team) ? "\fs\f1" : "\fs\f3", "\fr");
-	}
+    const char *chatcolorname(fpsent *d) {
+        if (!chatcolors || !m_teammode || d->state == CS_SPECTATOR) return colorname(d);
+        return colorname(d, NULL, isteam(d->team, player1->team) ? "\fs\f1" : "\fs\f3", "\fr");
+    }
 
     const char *teamcolor(const char *name, const char *team, const char *alt)
     {
@@ -826,7 +830,7 @@ namespace game
     });
 
     VARP(ammohud, 0, 1, 1);
-
+        
     void drawammohud(fpsent *d)
     {
         float x = HICON_X + 2*HICON_STEP, y = HICON_Y, sz = HICON_SIZE;
@@ -867,6 +871,21 @@ namespace game
         }
         glPopMatrix();
     }
+    
+    /* ammobar */
+    XIDENT(IDF_SWLACC, VARP, ammobar, 0, 0, 1);
+//    XIDENT(IDF_SWLACC, VARP, ammobardisablewithgui, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, ammobardisableininsta, 0, 0, 1);
+    
+    /* hudicons offset */
+    XIDENT(IDF_SWLACC, VARP, hudamouroffset_x, -100, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudamouroffset_y, -100, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudhealthoffset_x, -100, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudhealthoffset_y, -100, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudammooffset_x, -100, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudammooffset_y, -100, 0, 10000)
+
+    XIDENT(IDF_SWLACC, VARP, hudammoicon, 0, 1, 1);
 
     void drawhudicons(fpsent *d)
     {
@@ -874,40 +893,39 @@ namespace game
         glPushMatrix();
         glScalef(2, 2, 1);
 
-        draw_textf("%d", (HICON_X + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, d->state==CS_DEAD ? 0 : d->health);
+        draw_textf("%d", (hudhealthoffset_x + HICON_X + HICON_SIZE + HICON_SPACE)/2, (hudhealthoffset_y + HICON_TEXTY)/2, d->state==CS_DEAD ? 0 : d->health);
         if(d->state!=CS_DEAD)
         {
-            if(d->armour) draw_textf("%d", (HICON_X + HICON_STEP + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, d->armour);
-            draw_textf("%d", (HICON_X + 2*HICON_STEP + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, d->ammo[d->gunselect]);
+            if(d->armour) draw_textf("%d", (hudamouroffset_x + HICON_X + HICON_STEP + HICON_SIZE + HICON_SPACE)/2, (hudamouroffset_y + HICON_TEXTY)/2, d->armour);
+            if(hudammoicon) draw_textf("%d", (hudammooffset_x + HICON_X + 2*HICON_STEP + HICON_SIZE + HICON_SPACE)/2, (hudammooffset_y + HICON_TEXTY)/2, d->ammo[d->gunselect]);
         }
 
         glPopMatrix();
 
-        drawicon(HICON_HEALTH, HICON_X, HICON_Y);
+        drawicon(HICON_HEALTH, hudhealthoffset_x + HICON_X, hudhealthoffset_y + HICON_Y);
         if(d->state!=CS_DEAD)
         {
-            if(d->armour) drawicon(HICON_BLUE_ARMOUR+d->armourtype, HICON_X + HICON_STEP, HICON_Y);
-            drawicon(HICON_FIST+d->gunselect, HICON_X + 2*HICON_STEP, HICON_Y);
+            if(d->armour) drawicon(HICON_BLUE_ARMOUR+d->armourtype, hudamouroffset_x + HICON_X + HICON_STEP, hudamouroffset_y + HICON_Y);
+            if(hudammoicon) drawicon(HICON_FIST+d->gunselect, hudammooffset_x + HICON_X + 2*HICON_STEP, hudammooffset_y + HICON_Y);
             if(d->quadmillis) drawicon(HICON_QUAD, HICON_X + 3*HICON_STEP, HICON_Y);
-            if(ammohud) drawammohud(d);
+            if(ammohud && (!ammobar || (m_insta && ammobardisableininsta)) ) drawammohud(d);
         }
     }
 
     /* Game Clock */
     XIDENT(IDF_SWLACC, VARP, gameclock, 0, 1, 1);
-    //XIDENT(IDF_SWLACC, VARP, gameclockcountup, 0, 0, 1);  // TODO: fix the up-counting mode
-    XIDENT(IDF_SWLACC, VARP, gameclocksize, 1, 5, 30);
-    XIDENT(IDF_SWLACC, VARP, gameclockturnredonlowtime, 0, 1, 1);
-    XIDENT(IDF_SWLACC, VARP, gameclockcolor_r, 0, 255, 255);
-    XIDENT(IDF_SWLACC, VARP, gameclockcolor_g, 0, 255, 255);
-    XIDENT(IDF_SWLACC, VARP, gameclockcolor_b, 0, 255, 255);
-    XIDENT(IDF_SWLACC, VARP, gameclockcolor_a, 0, 255, 255);
-    XIDENT(IDF_SWLACC, VARP, gameclockoffset_x, 0, 900, 1000);
-    XIDENT(IDF_SWLACC, VARP, gameclockoffset_y, 0, 5, 1000);
-    XIDENT(IDF_SWLACC, VARP, gameclockoffset_x_withradar, 0, 765, 1000);
-    XIDENT(IDF_SWLACC, VARP, gameclockoffset_y_withradar, 0, 15, 1000);
     ICOMMAND(managegameclock, "", (), executestr("showgui gameclock_settings"));
-    /* ---------- */
+
+    /* hudscores */
+    XIDENT(IDF_SWLACC, VARP, hudscores, 0, 0, 1);
+    
+    /* hud options */
+    XIDENT(IDF_SWLACC, VARP, hudicons, 0, 1, 1);
+    XIDENT(IDF_SWLACC, VARP, hudspectator, 0, 1, 1);
+    XIDENT(IDF_SWLACC, VARP, hudradar, 0, 1, 1);
+    
+    /* frag messages */
+    XIDENT(IDF_SWLACC, VARP, fragmsg, 0, 0, 1);
 
     void gameplayhud(int w, int h)
     {
@@ -915,7 +933,7 @@ namespace game
         glPushMatrix();
         glScalef(h/1800.0f, h/1800.0f, 1);
 
-        if(player1->state==CS_SPECTATOR)
+        if(player1->state==CS_SPECTATOR && hudspectator)
         {
             int pw, ph, tw, th, fw, fh;
             text_bounds("  ", pw, ph);
@@ -941,7 +959,7 @@ namespace game
                     if(f->privilege)
                     {
                         //color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
-                    	color = f->privilege>=PRIV_ADMIN ? COL_ADMIN : COL_MASTER; // flat gui
+                        color = f->privilege>=PRIV_ADMIN ? COL_ADMIN : COL_MASTER; // flat gui
                         if(f->state==CS_DEAD) color = (color>>1)&0x7F7F7F;
                     }
                 }
@@ -953,50 +971,23 @@ namespace game
         fpsent *d = hudplayer();
         if(d->state!=CS_EDITING)
         {
-            if(d->state!=CS_SPECTATOR) drawhudicons(d);
-            if(cmode) cmode->drawhud(a, w, h);
+            if(d->state!=CS_SPECTATOR && hudicons) drawhudicons(d);
+            if(cmode && hudradar) cmode->drawhud(a, w, h);
         }
 
         glPopMatrix();
 
         const int gamemode = game::gamemode;
         if(gameclock && !m_edit)
-        {
-            static char buf[16];
-            const int millis = max(game::maplimit-lastmillis, 0);
-            int secs = millis/1000;
-            int mins = secs/60;
-            secs %= 60;
-            sprintf(buf, "%d:%02d", mins, secs);
-            
-            const float conscale = 0.33f;
-            const int conw = int(w/conscale), conh = int(h/conscale);
-            
-            int r = gameclockcolor_r,
-                g = gameclockcolor_g,
-                b = gameclockcolor_b,
-                a = gameclockcolor_a;
-            
-            if (mins < 1 && gameclockturnredonlowtime) {
-                r = 255;
-                g = 0;
-                b = 0;
-                a = 255;
-            }
-            
-            const float gameclockscale = 1 + gameclocksize/10.0;
-            const bool radar = (m_ctf || m_capture);
-            const float xoff = ((radar ? gameclockoffset_x_withradar : gameclockoffset_x)*conw/1000);
-            const float yoff = ((radar ? gameclockoffset_y_withradar : gameclockoffset_y)*conh/1000);
-            
-            glPushMatrix();
-            glScalef(conscale*gameclockscale, conscale*gameclockscale, 1);
-            draw_text(buf,
-                      xoff/gameclockscale,
-                      yoff/gameclockscale,
-                      r, g, b, a);
-            glPopMatrix();
-        }
+            drawgameclock(w, h);
+        
+        if(ammobar && !m_edit && d->state!=CS_DEAD && d->state!=CS_SPECTATOR &&
+           ! (m_insta && ammobardisableininsta))  drawammobar(d, w, h);
+        
+        if(hudscores && !m_edit) drawscores(w, h);
+        
+        if(fragmsg && (d->lastvictim != NULL || d->lastkiller != NULL) & (lastmillis-d->lastfragtime < fragmsgfade + 255 || lastmillis-d->lastdeathtime < fragmsgfade + 255))
+            drawfragmsg(d, w, h);
     }
 
     int clipconsole(int w, int h)

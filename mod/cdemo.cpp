@@ -13,7 +13,31 @@ static int starttime = 0;
 static uchar somespace[MAXTRANS];
 static ucharbuf p(somespace, MAXTRANS);
 
-static void writedemo(int chan, void* data, int len){
+const char *keep_client_demo_gui = 
+"newgui keepdemogui [\n"
+	"guititle \"Keep demo?\"\n"
+	"guialign 0 [\n"
+        "guilist [\n"
+            "guibar\n"
+            "guitext \"^f7Automatic client demo recording is ^f0active.\"\n"
+            "guitext \"^f7Would you like to ^f0keep ^f7the last recorded demo?\"\n"
+            "guistrut\n"
+            "guibar\n"
+            "guilist [\n"
+                "guistrut\n"
+                "guitext \"         \"\n"
+                "guibutton \"^f0Yes ^f7(default) \" [keepdemo 1]\n"
+                "guistrut\n"
+                "guibutton \"^f3No \" [keepdemo 0]\n"
+                "guistrut\n"
+            "]\n"
+            "guibar\n"
+        "]\n"
+	"]\n"
+"] \"Client Demo\"\n";
+
+static void writedemo(int chan, void* data, int len)
+{
        if(!demostream) return;
        int stamp[3] = { lastmillis - starttime, chan, len };
        lilswap(stamp, 3);
@@ -21,7 +45,8 @@ static void writedemo(int chan, void* data, int len){
        demostream->write(data, len);
 }
 
-void setup(const char* name_){
+void setup(const char* name_)
+{
        using game::gamemode;
        using game::players;
        using entities::ents;
@@ -79,7 +104,8 @@ void setup(const char* name_){
         putint(p, players[i]->privilege);
     }
     if(hasmaster) putint(p, -1);
-       if(game::ispaused()){
+       if(game::ispaused())
+       {
                putint(p, N_PAUSEGAME);
                putint(p, 1);
        }
@@ -98,7 +124,8 @@ void setup(const char* name_){
         sendstring("", p);
     }
        putint(p, N_RESUME);
-       loopv(players){
+       loopv(players)
+       {
                fpsent* d = players[i];
                putint(p, d->clientnum);
                putint(p, d->state);
@@ -114,9 +141,11 @@ void setup(const char* name_){
                loopi(GUN_PISTOL-GUN_SG+1) putint(p, d->ammo[GUN_SG+i]);
        }
        putint(p, -1);
-       loopv(players){
+       loopv(players)
+       {
                fpsent* d = players[i];
-               if(d->aitype != AI_NONE){
+               if(d->aitype != AI_NONE)
+               {
                        putint(p, N_INITAI);
                        putint(p, d->clientnum);
                        putint(p, d->ownernum);
@@ -126,7 +155,8 @@ void setup(const char* name_){
                        sendstring(d->name, p);
                        sendstring(d->team, p);
                }
-               else{
+               else
+               {
                        putint(p, N_INITCLIENT);
                        putint(p, d->clientnum);
                        sendstring(d->name, p);
@@ -145,22 +175,26 @@ void setup(const char* name_){
        sendstring(info, p);
        packet(1, p);
 
+       ::executestr(keep_client_demo_gui);
        conoutf("\f3recording client demo");
 
 }
 
-ENetPacket* packet(int chan, const ENetPacket* p){
+ENetPacket* packet(int chan, const ENetPacket* p)
+{
        if(demostream) writedemo(chan, p->data, p->dataLength);
        return const_cast<ENetPacket*>(p);
 }
 
-void packet(int chan, const ucharbuf& p){
+void packet(int chan, const ucharbuf& p)
+{
        if(!demostream) return;
        writedemo(chan, p.buf, p.len);
 }
 
 static int skiptextonce = 0;
-void addmsghook(int type, int cn, const ucharbuf& addmsgp){
+void addmsghook(int type, int cn, const ucharbuf& addmsgp)
+{
        if(!demostream) return;
        switch(type){
        case N_TEXT:
@@ -197,7 +231,8 @@ void addmsghook(int type, int cn, const ucharbuf& addmsgp){
        }
 }
 
-void sayteam(const char* msg){
+void sayteam(const char* msg)
+{
        if(!demostream) return;
        p.len = 0;
        putint(p, game::player1->clientnum);
@@ -205,7 +240,8 @@ void sayteam(const char* msg){
        packet(1, p);
 }
 
-void clipboard(int plainlen, int packlen, const uchar* data){
+void clipboard(int plainlen, int packlen, const uchar* data)
+{
        if(!demostream) return;
        packetbuf q(32 + packlen);
        putint(q, N_CLIPBOARD);
@@ -216,7 +252,8 @@ void clipboard(int plainlen, int packlen, const uchar* data){
        packet(1, q);
 }
 
-void explodefx(int cn, int gun, int id){
+void explodefx(int cn, int gun, int id)
+{
        if(!demostream) return;
        p.len = 0;
        putint(p, N_EXPLODEFX);
@@ -226,27 +263,70 @@ void explodefx(int cn, int gun, int id){
        packet(1, p);
 }
 
-void shotfx(int cn, int gun, int id, const vec& from, const vec& to){
-       if(!demostream) return;
-       p.len = 0;
-       putint(p, N_SHOTFX);
-       putint(p, cn);
-       putint(p, gun);
-       putint(p, id);
-       loopi(3) putint(p, int(from[i]*DMF));
-       loopi(3) putint(p, int(to[i]*DMF));
-       packet(1, p);
+void shotfx(int cn, int gun, int id, const vec& from, const vec& to)
+{
+    if(!demostream) return;
+    p.len = 0;
+    putint(p, N_SHOTFX);
+    putint(p, cn);
+    putint(p, gun);
+    putint(p, id);
+    loopi(3) putint(p, int(from[i]*DMF));
+    loopi(3) putint(p, int(to[i]*DMF));
+    packet(1, p);
 }
 
-void stop(){
-       if(!demostream) return;
-       DELETEP(demostream);
-       conoutf("\f3recorded client demo (%s)", name);
+string curname;
+void stop()
+{
+    if(!demostream) return;
+    DELETEP(demostream);
+    copystring(curname, name);
+    if(cdemoauto) showgui("keepdemogui");
+    else conoutf("\f0recorded client demo (%s)", name);
 }
 
 XIDENT(IDF_SWLACC, VARP, cdemoauto, 0, 0, 1);
 COMMANDN(cdemostart, setup, "s");
 COMMANDN(cdemostop, stop, "");
 ICOMMAND(say_nocdemo, "s", (char* s), skiptextonce = 1; game::toserver(s); );
+
+void keepdemo(int *keep)
+{
+    string nil;
+    copystring(nil, "null");
+    if (*keep == 0)
+    { // remove demo
+        if (strcmp(curname, nil) != 0)
+        {
+            int deleted;
+            string tmp;
+            copystring(tmp, homedir);
+            concatstring(tmp, curname);
+            deleted = remove(tmp);
+            if (deleted != 0) {
+                conoutf("\f3WARNING: Could not delete %s", curname);
+            }
+            else
+            {
+                conoutf("\f0Successfully deleted auto-recorded demo: %s", curname);
+                if (!game::connected) copystring(curname, nil);
+            }
+        }
+        else
+        {
+            conoutf("\f3WARNING: Empty demo name. No demo recorded or already erased!");
+            if (!game::connected) copystring(curname, nil);
+        }
+    } 
+    else
+    {
+        // keep demo
+        conoutf("\f0kept recorded client demo (%s)", curname);
+        if (!game::connected) copystring(curname, nil);
+    }
+}
+
+COMMAND(keepdemo,"i");
 
 }

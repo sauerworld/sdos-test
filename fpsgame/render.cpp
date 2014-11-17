@@ -200,7 +200,7 @@ namespace game
             bestteams.shrink(0);
             bestplayers.shrink(0);
             if(m_teammode) getbestteams(bestteams);
-            else getbestplayers(bestplayers);
+            else getbestplayers(bestplayers,1);
         }
 
         startmodelbatches();
