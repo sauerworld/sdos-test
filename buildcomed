@@ -30,6 +30,7 @@ then
 	cp INSTALL.md comed/INSTALL.txt
 	make PREFIX=i686-w64-mingw32
 	mv sauerbraten.exe comed/bin/sauerbraten.exe
+	make clean
 	make PREFIX=x86_64-w64-mingw32
 	mv sauerbraten.exe comed/bin64/sauerbraten.exe
 	zip -r comed-nightly-windows.zip comed
@@ -43,6 +44,7 @@ then
 	cp INSTALL.md comed/INSTALL.txt
 	make PREFIX=i686-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_client
+	make clean
 	make PREFIX=x86_64-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_64_client
 	zip -r comed-nightly-linux.zip comed
