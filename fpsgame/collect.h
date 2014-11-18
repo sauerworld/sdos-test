@@ -444,6 +444,9 @@ struct collectclientmode : clientmode
         return (h*(1 + 1 + 10))/(4*10);
     }
 
+    XIDENT(IDF_SWLACC, VARP, hudskulloffset_x, -1000, 0, 1000)
+    XIDENT(IDF_SWLACC, VARP, hudskulloffset_y, -1000, 0, 1000)
+    
     void drawhud(fpsent *d, int w, int h)
     {   
         if(guiisshowing()) return;
@@ -454,9 +457,9 @@ struct collectclientmode : clientmode
             int x = HICON_X + 3*HICON_STEP + (d->quadmillis ? HICON_SIZE + HICON_SPACE : 0);
             glPushMatrix();
             glScalef(2, 2, 1);
-            draw_textf("%d", (x + HICON_SIZE + HICON_SPACE)/2, HICON_TEXTY/2, d->tokens);
+            draw_textf("%d", (hudskulloffset_x + x + HICON_SIZE + HICON_SPACE)/2, ( hudskulloffset_y + HICON_TEXTY)/2, d->tokens);
             glPopMatrix();
-            drawicon(HICON_TOKEN, x, HICON_Y);
+            drawicon(HICON_TOKEN, hudskulloffset_x + x,hudskulloffset_y + HICON_Y);
         }
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -878,12 +878,14 @@ namespace game
     XIDENT(IDF_SWLACC, VARP, ammobardisableininsta, 0, 0, 1);
     
     /* hudicons offset */
-    XIDENT(IDF_SWLACC, VARP, hudamouroffset_x, -100, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudamouroffset_y, -100, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudhealthoffset_x, -100, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudhealthoffset_y, -100, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudammooffset_x, -100, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudammooffset_y, -100, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudamouroffset_x, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudamouroffset_y, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudhealthoffset_x, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudhealthoffset_y, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudammooffset_x, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudammooffset_y, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudquadoffset_x, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudquadoffset_y, -1000, 0, 10000)
 
     XIDENT(IDF_SWLACC, VARP, hudammoicon, 0, 1, 1);
 
@@ -907,7 +909,7 @@ namespace game
         {
             if(d->armour) drawicon(HICON_BLUE_ARMOUR+d->armourtype, hudamouroffset_x + HICON_X + HICON_STEP, hudamouroffset_y + HICON_Y);
             if(hudammoicon) drawicon(HICON_FIST+d->gunselect, hudammooffset_x + HICON_X + 2*HICON_STEP, hudammooffset_y + HICON_Y);
-            if(d->quadmillis) drawicon(HICON_QUAD, HICON_X + 3*HICON_STEP, HICON_Y);
+            if(d->quadmillis) drawicon(HICON_QUAD, hudquadoffset_x + HICON_X + 3*HICON_STEP, hudquadoffset_y + HICON_Y);
             if(ammohud && (!ammobar || (m_insta && ammobardisableininsta)) ) drawammohud(d);
         }
     }
