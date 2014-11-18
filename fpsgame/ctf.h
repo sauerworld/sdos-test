@@ -494,9 +494,6 @@ struct ctfclientmode : clientmode
         return (h*(1 + 1 + 10))/(4*10);
     }
     
-    XIDENT(IDF_SWLACC, VARP, hudflagoffset_x, -1000, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudflagoffset_y, -1000, 0, 10000)
-    
     void drawhud(fpsent *d, int w, int h)
     {   
         if(guiisshowing()) return;
@@ -507,12 +504,12 @@ struct ctfclientmode : clientmode
             loopv(flags) if(flags[i].owner == hudplayer())
             {
                 int x = HICON_X + 3*HICON_STEP + (d->quadmillis ? HICON_SIZE + HICON_SPACE : 0);
-                drawicon(m_hold ? HICON_NEUTRAL_FLAG : (flags[i].team==ctfteamflag(d->team) ? HICON_BLUE_FLAG : HICON_RED_FLAG), hudflagoffset_x + x, hudflagoffset_y + HICON_Y);
+                drawicon(m_hold ? HICON_NEUTRAL_FLAG : (flags[i].team==ctfteamflag(d->team) ? HICON_BLUE_FLAG : HICON_RED_FLAG), x, HICON_Y);
                 if(m_hold)
                 {
                     glPushMatrix();
                     glScalef(2, 2, 1);
-                    draw_textf("%d", ( hudflagoffset_x + x + HICON_SIZE + HICON_SPACE)/2, (hudflagoffset_y + HICON_TEXTY)/2, max(HOLDSECS - (lastmillis - flags[i].owntime)/1000, 0));
+                    draw_textf("%d", ( x + HICON_SIZE + HICON_SPACE)/2, (HICON_TEXTY)/2, max(HOLDSECS - (lastmillis - flags[i].owntime)/1000, 0));
                     glPopMatrix();
                 }
                 break;
