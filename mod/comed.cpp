@@ -429,12 +429,12 @@ namespace game
         iconid = (weapon > -1) ? HICON_FIST + weapon : HICON_TOKEN;
 
         if(!suicide) {
-            sprintf(buf1, "%s", teamcolor((!fragmsgname && att == d) ? "You" : att->name, (att == player1 && !fragmsgname) ? att->name : NULL));
+            sprintf(buf1, "%s", teamcolorname(att, NULL, (!fragmsgname && att == d) ? "You" : att->name));
             text_bounds(buf1, msg1w, msg1h);
             total_width += msg1w + WEAP_ICON_SPACE;
         }
 
-        sprintf(buf2, "%s", teamcolor((!fragmsgname && vic == d) ? "You" : vic->name, (vic == player1 && !fragmsgname) ? att->name : NULL));
+        sprintf(buf2, "%s", teamcolorname(vic, NULL, (!fragmsgname && vic == d) ? "You" : vic->name));
         text_bounds(buf2, msg2w, msg2h);
         total_width += msg2w + WEAP_ICON_SL + WEAP_ICON_SPACE;
 

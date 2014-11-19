@@ -741,10 +741,10 @@ namespace game
 
     VARP(teamcolortext, 0, 1, 1);
 
-    const char *teamcolorname(fpsent *d, const char *alt)
+    const char *teamcolorname(fpsent *d, const char *alt, const char *name)
     {
-        if(!teamcolortext || !m_teammode) return colorname(d, NULL, "", "", alt);
-        return colorname(d, NULL, isteam(d->team, autohudplayer()->team) ? "\fs\f1" : "\fs\f3", "\fr", alt); 
+        if(!teamcolortext || !m_teammode) return colorname(d, name, "", "", alt);
+        return colorname(d, name, isteam(d->team, autohudplayer()->team) ? "\fs\f1" : "\fs\f3", "\fr", alt); 
     }
 
     const char *teamcolor(const char *name, bool sameteam, const char *alt)
