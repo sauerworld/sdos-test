@@ -9,6 +9,7 @@ namespace game
     XIDENT(IDF_SWLACC, VARP, chatcolors, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, speccolors, 0, 0, 1);
     XIDENT(IDF_SWLACC, VARP, specautoteam, 0, 0, 1);
+    XIDENT(IDF_SWLACC, VARP, specautostats, 0, 0, 1);
 
     fpsent *lasttkvictim = NULL;
     fpsent *lasttkculprit = NULL;
@@ -144,10 +145,9 @@ namespace game
     
     fpsent *statsclient()
     {
-        if(player1->state!=CS_SPECTATOR || following<0) return player1;
-        fpsent *target = getclient(following);
-        if(target && target->state!=CS_SPECTATOR) return target;
-        return player1;
+        if(!specautostats) return player1;
+        fpsent *target = followingplayer();;
+        return target ? target : player1;
     }
 
     fpsent *hudplayer()
