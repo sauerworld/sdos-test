@@ -1311,11 +1311,11 @@ int main(int argc, char **argv)
         if(!lightupdate){
             // miscellaneous general game effects
             recomputecamera();
-            updateparticles();
             updatesounds();
         }
 
         if(minimized){
+            updateparticles();
             SDL_Delay(1);
             continue;
         }
