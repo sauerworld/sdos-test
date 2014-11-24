@@ -2615,6 +2615,8 @@ ullong draw(bool mainthread = false){
         if(!mainthread) start = tick();
 
         //drawing, was in engine/main.cpp
+        updateparticles();
+
         inbetweenframes = false;
         if(mainmenu) gl_drawmainmenu();
         else gl_drawframe();
