@@ -2354,16 +2354,16 @@ namespace server
         t = gamelimit - ((*minutes *60*1000) + (*seconds * 1000));
     	if( gamemillis < t) 
     	{   
-            t -= gamemillis;
     		emulatecurtime;
+            t -= gamemillis;
     		gamemillis += t;
     		readdemo(curtime + t);
     		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0);
     	}
         else 
         {
-            changemap(smapname, gamemode);
             emulatecurtime;
+            changemap(smapname, gamemode);
     		gamemillis += t;
     		readdemo(curtime + t);
     		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0);
