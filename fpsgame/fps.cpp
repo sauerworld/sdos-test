@@ -830,10 +830,12 @@ namespace game
     });
 
     VARP(ammohud, 0, 1, 1);
+    XIDENT(IDF_SWLACC, VARP, hudammooffset_x, -1000, 0, 10000)
+    XIDENT(IDF_SWLACC, VARP, hudammooffset_y, -1000, 0, 10000)
         
     void drawammohud(fpsent *d)
     {
-        float x = HICON_X + 2*HICON_STEP, y = HICON_Y, sz = HICON_SIZE;
+        float x = hudammooffset_x + HICON_X + 2*HICON_STEP, y = hudammooffset_x + HICON_Y, sz = HICON_SIZE;
         holdscreenlock;
         glPushMatrix();
         glScalef(1/3.2f, 1/3.2f, 1);
@@ -882,8 +884,6 @@ namespace game
     XIDENT(IDF_SWLACC, VARP, hudamouroffset_y, -1000, 0, 10000)
     XIDENT(IDF_SWLACC, VARP, hudhealthoffset_x, -1000, 0, 10000)
     XIDENT(IDF_SWLACC, VARP, hudhealthoffset_y, -1000, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudammooffset_x, -1000, 0, 10000)
-    XIDENT(IDF_SWLACC, VARP, hudammooffset_y, -1000, 0, 10000)
     XIDENT(IDF_SWLACC, VARP, hudquadoffset_x, -1000, 0, 10000)
     XIDENT(IDF_SWLACC, VARP, hudquadoffset_y, -1000, 0, 10000)
 
