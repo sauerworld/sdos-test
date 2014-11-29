@@ -1163,7 +1163,7 @@ int main(int argc, char **argv)
 
     execfile("sdos.cfg", false);
     
-    execfile("comed-gui.cfg", true);
+    execfile("data/comed-gui.cfg", true);
 
     initing = NOT_INITING;
 

@@ -2362,10 +2362,11 @@ namespace server
     	}
         else 
         {
-            emulatecurtime;
             changemap(smapname, gamemode);
+            //emulatecurtime;
     		gamemillis += t;
-    		readdemo(curtime + t);
+    		//readdemo(curtime + t);
+            readdemo(t);
     		sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0);
         }
     });
