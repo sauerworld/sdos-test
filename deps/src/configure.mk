@@ -33,7 +33,7 @@ libvorbis:
 	cd libvorbis; ./configure --host=$(PREFIX) --prefix="$(ROOT)" --enable-shared=no --disable-oggtest --enable-docs=no --enable-examples=no
 
 libSDL:
-	cd libSDL; unset PKG_CONFIG_LIBDIR; ./configure --host=$(PREFIX) --prefix="$(ROOT)" --enable-shared=no --enable-assertions=release --enable-render=no --enable-joystick=no --enable-haptic=no --enable-power=no --enable-ssemath --enable-sse2 --disable-alsatest --enable-diskaudio=no --enable-dummyaudio=no --enable-video-dummy=no --enable-libudev=no --enable-dbus=no --enable-input-tslib=no --enable-render-d3d=no $(EXCLUDEX11)
+	cd libSDL; unset PKG_CONFIG_LIBDIR; ac_cv_header_iconv_h=no ac_cv_func_iconv=no ac_cv_func_iconv_open=no ./configure --host=$(PREFIX) --prefix="$(ROOT)" --enable-shared=no --enable-assertions=release --enable-render=no --enable-joystick=no --enable-haptic=no --enable-power=no --enable-ssemath --enable-sse2 --disable-alsatest --enable-diskaudio=no --enable-dummyaudio=no --enable-video-dummy=no --enable-libudev=no --enable-dbus=no --enable-input-tslib=no --enable-render-d3d=no $(EXCLUDEX11)
 
 libSDL_image:
 	cd libSDL_image; ac_cv_lib_jpeg_jpeg_CreateDecompress=yes ./configure --host=$(PREFIX) --prefix="$(ROOT)" --enable-shared=no --enable-imageio=no --enable-bmp=no --enable-gif=no --enable-jpg-shared=no --enable-png-shared=no --enable-pnm=no --enable-webp=no --enable-tif=no --enable-lbm=no --enable-pcx=no --enable-tga=no --enable-xcf=no --enable-xpm=no --enable-xv=no --disable-sdltest
