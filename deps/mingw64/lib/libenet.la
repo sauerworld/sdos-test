@@ -17,7 +17,7 @@ old_library='libenet.a'
 inherited_linker_flags=' -pthread'
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/home/pisto/sorgenti/sdos-test/deps/mingw64/lib'
+dependency_libs=' -L/home/pisto/sorgenti/community-edition/deps/mingw64/lib'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/pisto/sorgenti/sdos-test/deps/mingw64/lib'
+libdir='/home/pisto/sorgenti/community-edition/deps/mingw64/lib'

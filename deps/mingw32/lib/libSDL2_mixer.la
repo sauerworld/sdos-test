@@ -17,7 +17,7 @@ old_library='libSDL2_mixer.a'
 inherited_linker_flags=' -pthread'
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/home/pisto/sorgenti/sdos-test/deps/mingw32/lib -lmingw32 -lSDL2main /home/pisto/sorgenti/sdos-test/deps/mingw32/lib/libSDL2.la -liconv -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid /home/pisto/sorgenti/sdos-test/deps/mingw32/lib/libvorbisfile.la /home/pisto/sorgenti/sdos-test/deps/mingw32/lib/libvorbis.la /home/pisto/sorgenti/sdos-test/deps/mingw32/lib/libogg.la'
+dependency_libs=' -L/home/pisto/sorgenti/community-edition/deps/mingw32/lib -lmingw32 -lSDL2main /home/pisto/sorgenti/community-edition/deps/mingw32/lib/libSDL2.la -liconv -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid /home/pisto/sorgenti/community-edition/deps/mingw32/lib/libvorbisfile.la /home/pisto/sorgenti/community-edition/deps/mingw32/lib/libvorbis.la /home/pisto/sorgenti/community-edition/deps/mingw32/lib/libogg.la'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/pisto/sorgenti/sdos-test/deps/mingw32/lib'
+libdir='/home/pisto/sorgenti/community-edition/deps/mingw32/lib'

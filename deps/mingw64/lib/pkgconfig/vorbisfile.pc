@@ -1,6 +1,6 @@
 # libvorbisfile pkg-config source file
 
-prefix=/home/pisto/sorgenti/sdos-test/deps/mingw64
+prefix=/home/pisto/sorgenti/community-edition/deps/mingw64
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
