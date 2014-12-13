@@ -377,7 +377,7 @@ void findvisiblemms(const vector<extentity *> &ents)
                 {
                     extentity &e = *ents[oe->mapmodels[i]];
                     if(e.flags&extentity::F_NOVIS) continue;
-                    e.visible = true;
+                    e.flags |= extentity::F_RENDER;
                     ++visible;
                 }
                 if(!visible) continue;
@@ -440,8 +440,8 @@ void renderreflectedmapmodels()
         loopv(oe->mapmodels)
         {
            extentity &e = *ents[oe->mapmodels[i]];
-           if(e.visible || e.flags&extentity::F_NOVIS) continue;
-           e.visible = true;
+           if(e.flags&(extentity::F_NOVIS | extentity::F_RENDER)) continue;
+           e.flags |= extentity::F_RENDER;
         }
     }
     if(mms)
@@ -452,9 +452,9 @@ void renderreflectedmapmodels()
             loopv(oe->mapmodels)
             {
                 extentity &e = *ents[oe->mapmodels[i]];
-                if(!e.visible) continue;
+                if(!(e.flags&extentity::F_RENDER)) continue;
                 rendermapmodel(e);
-                e.visible = false;
+                e.flags &= ~extentity::F_RENDER;
             }
         }
         endmodelbatches();
@@ -479,7 +479,7 @@ void rendermapmodels()
         loopv(oe->mapmodels)
         {
             extentity &e = *ents[oe->mapmodels[i]];
-            if(!e.visible) continue;
+            if(!(e.flags&extentity::F_RENDER)) continue;
             if(!rendered)
             {
                 rendered = true;
@@ -487,7 +487,7 @@ void rendermapmodels()
                 if(oe->query) startmodelquery(oe->query);
             }        
             rendermapmodel(e);
-            e.visible = false;
+            e.flags &= ~extentity::F_RENDER;
         }
         if(rendered && oe->query) endmodelquery();
     }

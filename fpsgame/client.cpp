@@ -129,7 +129,7 @@ namespace game
 
     void switchname(const char *name)
     {
-        filtertext(player1->name, name, false, MAXNAMELEN);
+        filtertext(player1->name, name, false, false, MAXNAMELEN);
         if(!player1->name[0]) copystring(player1->name, "unnamed");
         addmsg(N_SWITCHNAME, "rs", player1->name);
     }
@@ -147,7 +147,7 @@ namespace game
 
     void switchteam(const char *team)
     {
-        if(player1->clientnum < 0) filtertext(player1->team, team, false, MAXTEAMLEN);
+        if(player1->clientnum < 0) filtertext(player1->team, team, false, false, MAXTEAMLEN);
         else addmsg(N_SWITCHTEAM, "rs", team);
     }
     void printteam()
@@ -1312,7 +1312,7 @@ namespace game
             {
                 if(!d) return;
                 getstring(text, p);
-                filtertext(text, text);
+                filtertext(text, text, true, true);
                 if(isignored(d->clientnum)) break;
                 if(d->state!=CS_DEAD && d->state!=CS_SPECTATOR)
                     particle_textcopy(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
@@ -1325,7 +1325,7 @@ namespace game
                 int tcn = getint(p);
                 fpsent *t = getclient(tcn);
                 getstring(text, p);
-                filtertext(text, text);
+                filtertext(text, text, true, true);
                 if(!t || isignored(t->clientnum)) break;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
                     particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, 0x6496FF, 4.0f, -8);
@@ -1383,7 +1383,7 @@ namespace game
                     break;
                 }
                 getstring(text, p);
-                filtertext(text, text, false, MAXNAMELEN);
+                filtertext(text, text, false, false, MAXNAMELEN);
                 if(!text[0]) copystring(text, "unnamed");
                 if(d->name[0])          // already connected
                 {
@@ -1397,7 +1397,7 @@ namespace game
                 }
                 copystring(d->name, text, MAXNAMELEN+1);
                 getstring(text, p);
-                filtertext(d->team, text, false, MAXTEAMLEN);
+                filtertext(d->team, text, false, false, MAXTEAMLEN);
                 d->playermodel = getint(p);
                 break;
             }
@@ -1406,7 +1406,7 @@ namespace game
                 getstring(text, p);
                 if(d)
                 {
-                    filtertext(text, text, false, MAXNAMELEN);
+                    filtertext(text, text, false, false, MAXNAMELEN);
                     if(!text[0]) copystring(text, "unnamed");
                     if(strcmp(text, d->name))
                     {
@@ -1714,7 +1714,7 @@ namespace game
                 int type = getint(p);
                 getstring(text, p);
                 string name;
-                filtertext(name, text, false, MAXSTRLEN-1);
+                filtertext(name, text, false);
                 ident *id = getident(name);
                 switch(type)
                 {
@@ -1869,7 +1869,7 @@ namespace game
                 int reason = getint(p);
                 fpsent *w = getclient(wn);
                 if(!w) return;
-                filtertext(w->team, text, false, MAXTEAMLEN);
+                filtertext(w->team, text, false, false, MAXTEAMLEN);
                 static const char * const fmt[2] = { "%s switched to team %s", "%s forced to team %s"};
                 if(reason >= 0 && size_t(reason) < sizeof(fmt)/sizeof(fmt[0]))
                     conoutf(fmt[reason], colorname(w), w->team);
@@ -1938,9 +1938,9 @@ namespace game
                 int bn = getint(p), on = getint(p), at = getint(p), sk = clamp(getint(p), 1, 101), pm = getint(p);
                 string name, team;
                 getstring(text, p);
-                filtertext(name, text, false, MAXNAMELEN);
+                filtertext(name, text, false, false, MAXNAMELEN);
                 getstring(text, p);
-                filtertext(team, text, false, MAXTEAMLEN);
+                filtertext(team, text, false, false, MAXTEAMLEN);
                 fpsent *b = newclient(bn);
                 if(!b) break;
                 ai::init(b, at, on, sk, bn, pm, name, team);
