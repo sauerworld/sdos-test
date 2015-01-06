@@ -2612,6 +2612,7 @@ ullong draw(bool mainthread = false){
 
     {
         holdscreenlock;
+        gl_resize();
         if(!mainthread) start = tick();
 
         //drawing, was in engine/main.cpp
