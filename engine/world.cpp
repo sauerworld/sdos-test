@@ -146,7 +146,7 @@ vector<int> outsideents;
 
 static bool modifyoctaent(int flags, int id, extentity &e)
 {
-    if(flags&MODOE_ADD ? e.flags&extentity::F_OCTA : !(e.flags&extentity::F_OCTA)) return false;
+    if(flags&MODOE_ADD ? e.flags&EF_OCTA : !(e.flags&EF_OCTA)) return false;
 
     ivec o, r;
     if(!getentboundingbox(e, o, r)) return false;
@@ -168,7 +168,7 @@ static bool modifyoctaent(int flags, int id, extentity &e)
         if(diff && (limit > octaentsize/2 || diff < leafsize*2)) leafsize *= 2;
         modifyoctaentity(flags, id, e, worldroot, ivec(0, 0, 0), worldsize>>1, o, r, leafsize);
     }
-    e.flags ^= extentity::F_OCTA;
+    e.flags ^= EF_OCTA;
     if(e.type == ET_LIGHT) clearlightcache(id);
     else if(e.type == ET_PARTICLES) clearparticleemitters();
     else if(flags&MODOE_LIGHTENT) lightent(e);
@@ -205,26 +205,26 @@ void entitiesinoctanodes()
     loopv(ents) modifyoctaent(MODOE_ADD, i, *ents[i]);
 }
 
-static inline void findents(octaentities &oe, int low, int high, bool notspawned, const vec &pos, const vec &radius, vector<int> &found)
+static inline void findents(octaentities &oe, int low, int high, bool notspawned, const vec &pos, const vec &invradius, vector<int> &found)
 {
     vector<extentity *> &ents = entities::getents();
     loopv(oe.other)
     {
         int id = oe.other[i];
         extentity &e = *ents[id];
-        if(e.type >= low && e.type <= high && (e.spawned() || notspawned) && vec(e.o).mul(radius).squaredlen() <= 1) found.add(id);
+        if(e.type >= low && e.type <= high && (e.spawned() || notspawned) && vec(e.o).sub(pos).mul(invradius).squaredlen() <= 1) found.add(id);
     }
 }
 
-static inline void findents(cube *c, const ivec &o, int size, const ivec &bo, const ivec &br, int low, int high, bool notspawned, const vec &pos, const vec &radius, vector<int> &found)
+static inline void findents(cube *c, const ivec &o, int size, const ivec &bo, const ivec &br, int low, int high, bool notspawned, const vec &pos, const vec &invradius, vector<int> &found)
 {
     loopoctabox(o, size, bo, br)
     {
-        if(c[i].ext && c[i].ext->ents) findents(*c[i].ext->ents, low, high, notspawned, pos, radius, found);
+        if(c[i].ext && c[i].ext->ents) findents(*c[i].ext->ents, low, high, notspawned, pos, invradius, found);
         if(c[i].children && size > octaentsize) 
         {
             ivec co(i, o.x, o.y, o.z, size);
-            findents(c[i].children, co, size>>1, bo, br, low, high, notspawned, pos, radius, found);
+            findents(c[i].children, co, size>>1, bo, br, low, high, notspawned, pos, invradius, found);
         }
     }
 }
