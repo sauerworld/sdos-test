@@ -904,7 +904,6 @@ void checkinput()
 
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                     {
-                        holdscreenlock;
                         SDL_GetWindowSize(screen, &winw, &winh);
                         SDL_GL_GetDrawableSize(screen, &screenw, &screenh);
                         if(!(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN))
@@ -912,7 +911,6 @@ void checkinput()
                             scr_w = clamp(screenw, SCR_MINW, SCR_MAXW);
                             scr_h = clamp(screenh, SCR_MINH, SCR_MAXH);
                         }
-                        gl_resize();
                     }
                         break;
                 }
