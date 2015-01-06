@@ -78,7 +78,7 @@ void setup(const char* name_)
        putint(p, N_ITEMLIST);
        loopv(ents)
                if(ents[i]->type>=I_SHELLS && ents[i]->type<=I_QUAD && (!m_noammo || ents[i]->type<I_SHELLS || ents[i]->type>I_CARTRIDGES)
-               && ents[i]->spawned){
+               && ents[i]->spawned()){
                        putint(p, i);
                        putint(p, ents[i]->type);
        }
