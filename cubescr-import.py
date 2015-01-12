@@ -28,7 +28,7 @@ def main():
             raw_name = file_name[0:file_name.index('.')].split('/')[1]
             script_names.append(raw_name)
 
-            write('const char *{:s} ='.format(raw_name))
+            write('const char *script_{:s} ='.format(raw_name))
 
             with open(file_name, 'r') as cfg_file:
                 for line in cfg_file:
@@ -40,7 +40,7 @@ def main():
                 write()
   
         if script_names:
-            write('const char *sdos_scripts[] = {{ {:s}, 0 }};'.format(', '.join(script_names)))
+            write('const char *sdos_scripts[] = {{ script_{:s}, 0 }};'.format(', script_'.join(script_names)))
         else:
             write('const char *sdos_scripts[] = {0};')
 

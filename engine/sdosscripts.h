@@ -3,7 +3,7 @@
 
 /* automatically generated file -- do not edit */
 
-const char *demo =
+const char *script_demo =
 "newgui keepdemogui [\n"
 "	guititle \"Keep demo?\"\n"
 "	guialign 0 [\n"
@@ -27,7 +27,7 @@ const char *demo =
 "] \"Client Demo\"\n"
 ;
 
-const char *clock =
+const char *script_clock =
 "newgui gameclock_settings [\n"
 "    guititle \"Game Clock Settings\"\n"
 "    guibar\n"
@@ -55,7 +55,7 @@ const char *clock =
 "] \"General\"\n"
 ;
 
-const char *sdos_scripts[] = { demo, clock, 0 };
+const char *sdos_scripts[] = { script_demo, script_clock, 0 };
 
 #endif /* sauerbraten_sdosscripts_h */
 
