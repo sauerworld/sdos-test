@@ -25,7 +25,7 @@ def main():
         write()
 
         for file_name in file_names:
-            raw_name = file_name[0:file_name.index('.')]
+            raw_name = file_name[0:file_name.index('.')].split('/')[1]
             script_names.append(raw_name)
 
             write('const char *{:s} ='.format(raw_name))
