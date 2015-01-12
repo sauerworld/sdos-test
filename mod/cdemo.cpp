@@ -13,29 +13,6 @@ static int starttime = 0;
 static uchar somespace[MAXTRANS];
 static ucharbuf p(somespace, MAXTRANS);
 
-const char *keep_client_demo_gui = 
-"newgui keepdemogui [\n"
-	"guititle \"Keep demo?\"\n"
-	"guialign 0 [\n"
-        "guilist [\n"
-            "guibar\n"
-            "guitext \"^f7Automatic client demo recording is ^f0active.\"\n"
-            "guitext \"^f7Would you like to ^f0keep ^f7the last recorded demo?\"\n"
-            "guistrut\n"
-            "guibar\n"
-            "guilist [\n"
-                "guistrut\n"
-                "guitext \"         \"\n"
-                "guibutton \"^f0Yes ^f7(default) \" [keepdemo 1]\n"
-                "guistrut\n"
-                "guibutton \"^f3No \" [keepdemo 0]\n"
-                "guistrut\n"
-            "]\n"
-            "guibar\n"
-        "]\n"
-	"]\n"
-"] \"Client Demo\"\n";
-
 static void writedemo(int chan, void* data, int len)
 {
        if(!demostream) return;
@@ -175,7 +152,6 @@ void setup(const char* name_)
        sendstring(info, p);
        packet(1, p);
 
-       ::executestr(keep_client_demo_gui);
        conoutf("\f3recording client demo");
 
 }

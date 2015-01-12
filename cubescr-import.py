@@ -14,7 +14,7 @@ def main():
     def write(s=''):
         out.write(s + '\n')
 
-    file_names = glob.iglob('*.cfg')
+    file_names = glob.iglob('scripts/*.cfg')
     script_names = []
 
     with open(out_file, 'w') as out:
