@@ -1557,7 +1557,7 @@ namespace game
                 if(!target) break; 
                 target->hitpush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, gun);
                 actor = target->lastdamagecauser;
-                actor->lastddweapon = target->lastdrweapon = gun;
+                if(actor) actor->lastddweapon = target->lastdrweapon = gun;
                 break;
             }
 
