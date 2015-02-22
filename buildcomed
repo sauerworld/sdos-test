@@ -25,8 +25,8 @@ fi
 if [[ "$arch" == "win" ]]
 then 
 	cp -r pak comed
-	mkdir comed/bin
-	mkdir comed/bin64
+	mkdir -p comed/bin
+	mkdir -p comed/bin64
 	cp INSTALL.md comed/INSTALL.txt
 	make PREFIX=i686-w64-mingw32
 	mv sauerbraten.exe comed/bin/sauerbraten.exe
@@ -40,7 +40,7 @@ fi
 if [[ "$arch" == "lin" ]]
 then 
 	cp -r pak comed
-	mkdir comed/bin_unix
+	mkdir -p comed/bin_unix
 	cp INSTALL.md comed/INSTALL.txt
 	make PREFIX=i686-unknown-linux-gnu
 	mv sauer_client comed/bin_unix/linux_client
@@ -73,7 +73,9 @@ then
 	echo ""
 	cp -r pak comed
 	cp INSTALL.md comed/INSTALL.txt
-	make CXX=x86_64-apple-darwin13-clang++ CC=x86_64-apple-darwin13-clang PREFIX=x86_64-apple-darwin13 STRIP=x86_64-apple-darwin13-strip
+	eval $(osxcross-conf 2>/dev/null)
+	make CXX=x86_64-apple-$OSXCROSS_TARGET-clang++ CC=x86_64-apple-$OSXCROSS_TARGET-clang \
+             PREFIX=x86_64-apple-$OSXCROSS_TARGET STRIP=x86_64-apple-$OSXCROSS_TARGET-strip
 	mv sauerbraten comed/
 	zip -r comed-nightly-osx.zip comed
 	rm -r comed

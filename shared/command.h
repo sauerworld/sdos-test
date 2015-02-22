@@ -340,5 +340,4 @@ extern int ident_mod_boot(const char* name, int orflags);
 
 #define XIDENT(orflags, macro, name, ...)\
 		macro(name, ##__VA_ARGS__);\
-		static int name ## Xhook = ident_mod_boot(#name, orflags);
-
+		UNUSED static int name ## Xhook = ident_mod_boot(#name, orflags);

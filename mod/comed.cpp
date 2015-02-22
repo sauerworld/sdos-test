@@ -399,7 +399,7 @@ namespace game
         string buf1, buf2;
         fpsent *att, *vic;
         int fragtime, weapon,
-            msg1w, msg1h, msg2w, msg2h, total_width = 0,
+            msg1w = 0, msg1h, msg2w, msg2h, total_width = 0,
             msg1posx, msgiconposx, msg2posx, msgxoffset,
             iconid;
         float alpha;
