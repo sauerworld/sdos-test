@@ -572,6 +572,12 @@ namespace game
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
 
+    void forceintermission()
+    {
+        if(!remote && !hasnonlocalclients()) server::startintermission();
+        else addmsg(N_FORCEINTERMISSION, "r");
+    }
+
     void forceedit(const char *name)
     {
         changemap(name, 1);
@@ -1135,14 +1141,11 @@ namespace game
                 d->move = (physstate>>4)&2 ? -1 : (physstate>>4)&1;
                 d->strafe = (physstate>>6)&2 ? -1 : (physstate>>6)&1;
                 vec oldpos(d->o);
-                if(allowmove(d))
-                {
-                    d->o = o;
-                    d->o.z += d->eyeheight;
-                    d->vel = vel;
-                    d->falling = falling;
-                    d->physstate = physstate&7;
-                }
+                d->o = o;
+                d->o.z += d->eyeheight;
+                d->vel = vel;
+                d->falling = falling;
+                d->physstate = physstate&7;
                 updatephysstate(d);
                 updatepos(d);
                 if(smoothmove && d->smoothmillis>=0 && oldpos.dist(d->o) < smoothdist)
