@@ -3,8 +3,7 @@
 PREFIX=`[[ -z $1 ]] && ../config.guess || echo $1`
 j=`(nproc || (sysctl hw.ncpu | awk '{print $2}') || echo 1) 2>/dev/null`
 DEPSNAME=`grep -Eo '(linux|mingw|apple)' <<< $PREFIX``grep -q x86_64 <<< $PREFIX && echo 64 || echo 32`
-rm -rf ../$DEPSNAME
-mkdir ../$DEPSNAME
+git clean -dfx ../$DEPSNAME
 read -p "git -clean -dfx? " -n 1 -r
 echo
 [[ $REPLY =~ ^[Yy]$ ]] && git clean -dfx .
