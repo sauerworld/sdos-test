@@ -212,7 +212,7 @@ int connectwithtimeout(ENetSocket sock, const char *hostname, const ENetAddress 
     return -1;
 }
  
-XIDENT(IDF_SWLACC, VAR, pingcoloring, 0, 1, 1);
+XIDENT(IDF_SWLACC, VARP, pingcoloring, 0, 0, 1);
 
 struct pingattempts
 {

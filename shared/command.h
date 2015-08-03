@@ -340,4 +340,5 @@ extern int ident_mod_boot(const char* name, int orflags);
 
 #define XIDENT(orflags, macro, name, ...)\
 		macro(name, ##__VA_ARGS__);\
-		UNUSED static int name ## Xhook = ident_mod_boot(#name, orflags);
+		static int name ## Xhook [[gnu::unused]] = ident_mod_boot(#name, orflags);
+
