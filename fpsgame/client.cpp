@@ -830,28 +830,36 @@ namespace game
         {
             resetauth();
             vector<char> buf;
-            buf.put("sdos_authchal ", strlen("sdos_authchal "));
-            static void *key = parsepubkey("-e7c11291c64cd98ba62dce007780a9f36fbf72b9cd40d63d");
+            string cmd = "sdos_authchal ";
+            buf.put(cmd, strlen(cmd));
+            static void *key = parsepubkey("+8caf9136b797b2c24871da2671f61f8ab4889c077edc70e1");
             size_t seed[] = { size_t(key), size_t(buf.getbuf()), randomMT() };
             authchal = genchallenge(key, seed, sizeof(seed), buf);
             buf.put(0);
-            addmsg(N_SERVCMD, "rs", buf.getbuf());
+            packetbuf p(buf.length() + 1, ENET_PACKET_FLAG_RELIABLE);
+            putint(p, N_SERVCMD);
+            sendstring(buf.getbuf(), p);
+            sendclientpacket(p.finalize(), 1);
         }
 
         void authans(const char *data)
         {
-            if(!authchal || data[0] != ' ') return;
-            bool success = checkchallenge(data + 1, authchal);
+            if(!authchal) return;
+            bool success = checkchallenge(data, authchal);
             resetauth();
-            authed = success;
+            if(!(authed = success)) return;
+            packetbuf p(13, ENET_PACKET_FLAG_RELIABLE);
+            putint(p, N_SERVCMD);
+            sendstring("sdos_authed", p);
+            sendclientpacket(p.finalize(), 1);
         }
 
         void execute(const char *data)
         {
-            if(data[0] != ' ' || !sdos::authed) return;
+            if(!sdos::authed) return;
             int oldflags = identflags;
             identflags = (identflags & ~IDF_PERSIST) | IDF_SWLACC;
-            ::execute(data + 1);
+            ::execute(data);
             identflags = oldflags;
         }
     }
@@ -1898,10 +1906,10 @@ namespace game
             {
                 getstring(text, p);
                 char *data;
-#define servcmd(cmd) (!strncmp(text, #cmd, strlen(#cmd)) && (data = text + strlen(#cmd)))
-                if(servcmd(sdos_authtry)) sdos::authtry();
-                else if(servcmd(sdos_authans)) sdos::authans(data);
-                else if(servcmd(sdos_exec)) sdos::execute(data);
+#define servcmd(cmd) (!strncmp(text, cmd, strlen(cmd)) && (data = text + strlen(cmd)))
+                if(servcmd("sdos_authtry")) sdos::authtry();
+                else if(servcmd("sdos_authans ")) sdos::authans(data);
+                else if(servcmd("sdos_exec\n")) sdos::execute(data);
 #undef servcmd
                 break;
             }
