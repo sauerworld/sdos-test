@@ -56,28 +56,13 @@ fi
 if [[ "$arch" == "mac" ]]
 then 
 	echo ""
-	echo "note: this fails on darwin kernels > 13.2.0, e.g. OS X 10.9"
-	echo "quickfix should be to rename the deps/*darwin* dir to the propper version number"
-	echo ""
-	cp -r pak comed
-	cp INSTALL.md comed/INSTALL.txt
-	make PREFIX=x86_64-apple-darwin13.2.0
-	mv sauerbraten comed/
-	zip -r comed-nightly-osx.zip comed
-	rm -r comed
-fi
-
-if [[ "$arch" == "macX" ]]
-then 
-	echo ""
 	echo "using osxcross crosscompiler suite to build" 
 	echo "see http://github.com/tpoechtrager/osxcross"
 	echo ""
 	cp -r pak comed
 	cp INSTALL.md comed/INSTALL.txt
 	eval $(osxcross-conf 2>/dev/null)
-	make CXX=x86_64-apple-$OSXCROSS_TARGET-clang++ CC=x86_64-apple-$OSXCROSS_TARGET-clang \
-             PREFIX=x86_64-apple-$OSXCROSS_TARGET STRIP=x86_64-apple-$OSXCROSS_TARGET-strip
+	make PREFIX=x86_64-apple-$OSXCROSS_TARGET
 	mv sauerbraten comed/
 	zip -r comed-nightly-osx.zip comed
 	rm -r comed
