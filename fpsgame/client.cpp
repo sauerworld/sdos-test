@@ -1759,6 +1759,7 @@ namespace game
                 putint(cping, player1->ping = (player1->ping*5+totalmillis-getint(p))/6);
                 sendclientpacket(cping.finalize(), 1);
                 skipcdemorecord = true;
+                break;
             }
 
             case N_CLIENTPING:
