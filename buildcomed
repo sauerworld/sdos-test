@@ -4,6 +4,8 @@
 # Community Edition build script
 #
 
+set -e
+
 if [[ -n "$1" ]]
 then
 	if [[ "$1" == "win" || "$1" == "lin" || "$1" == "mac" || "$1" == "macX" ]]
