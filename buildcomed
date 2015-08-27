@@ -8,11 +8,11 @@ set -e
 
 if [[ -n "$1" ]]
 then
-	if [[ "$1" == "win" || "$1" == "lin" || "$1" == "mac" || "$1" == "macX" ]]
+	if [[ "$1" == "win" || "$1" == "lin" || "$1" == "mac" ]]
 	then 
 		arch=$1
 	else
-		echo "Unknown arch value, try: win, lin, mac or macX"
+		echo "Unknown arch value, try: win, lin or mac"
 		exit
 	fi
 else
