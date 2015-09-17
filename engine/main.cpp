@@ -904,6 +904,7 @@ void checkinput()
 
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                     {
+                        holdscreenlock;
                         SDL_GetWindowSize(screen, &winw, &winh);
                         SDL_GL_GetDrawableSize(screen, &screenw, &screenh);
                         if(!(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN))
