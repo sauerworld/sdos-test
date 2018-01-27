@@ -126,9 +126,9 @@ client:	$(CLIENT_OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o sauer_client $(CLIENT_OBJS) -Wl,--as-needed -Wl,--start-group $(LIBS) -lrt -Wl,--end-group
 	$(STRIP) sauer_client
 ifneq ($(STRIP),true)
-ifneq (, $(findstring x86_64,$(PREFIX)))
-	./quirks/remove_symbol_version memcpy@GLIBC_2.2.5
-endif
+#ifneq (, $(findstring x86_64,$(PREFIX)))
+#	./quirks/remove_symbol_version memcpy@GLIBC_2.2.5
+#endif
 endif
 	-$(UPX) sauer_client
 endif

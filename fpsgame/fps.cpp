@@ -17,7 +17,7 @@ namespace game
     ICOMMAND(getlasttkvictim, "", (), result((lasttkvictim == NULL) ? "" : lasttkvictim->name));
     ICOMMAND(getlasttkculprit, "", (), result((lasttkculprit == NULL) ? "" : lasttkculprit->name));
 
-	bool intermission = false;
+    bool intermission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
     int respawnent = -1;
     int lasthit = 0, lastspawnattempt = 0;
@@ -30,6 +30,9 @@ namespace game
 
     bool clientoption(const char *arg) { return false; }
 
+    ICOMMAND(getlastkiller, "", (), result((player1->lastkiller == NULL) ? "" : player1->lastkiller->name));
+    ICOMMAND(getlastvictim, "", (), result((player1->lastvictim == NULL) ? "" : player1->lastvictim->name));
+    
     void taunt()
     {
         if(player1->state!=CS_ALIVE || player1->physstate<PHYS_SLOPE) return;
